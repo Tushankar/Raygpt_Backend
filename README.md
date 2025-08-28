@@ -164,6 +164,7 @@ For deploying to Render:
 5. **Deploy**
 
 **Firebase Environment Variables for Render:**
+
 ```
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_PRIVATE_KEY_ID=your-private-key-id
