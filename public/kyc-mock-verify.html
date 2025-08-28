@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock KYC Verification</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .verification-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        .step {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .step.active {
+            background: #e8f5e8;
+            border-left-color: #4CAF50;
+        }
+        .step.completed {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover { background: #45a049; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="logo">D</div>
+        <h1>Identity Verification</h1>
+        <p class="subtitle">Mock KYC Process</p>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="step" id="step1">
+            <h3>📋 Document Upload</h3>
+            <p>Upload your identity documents</p>
+        </div>
+        
+        <div class="step" id="step2">
+            <h3>🤳 Selfie Verification</h3>
+            <p>Take a selfie to verify your identity</p>
+        </div>
+        
+        <div class="step" id="step3">
+            <h3>🔍 AI Verification</h3>
+            <p>Our AI is processing your documents</p>
+        </div>
+        
+        <div class="step" id="step4">
+            <h3>✅ Verification Complete</h3>
+            <p>Your identity has been successfully verified</p>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button id="startBtn" onclick="startVerification()">Start Verification</button>
+            <button id="completeBtn" onclick="completeVerification()" style="display: none;">Complete</button>
+        </div>
+        
+        <div id="status" style="margin-top: 20px; color: #666;"></div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        const steps = ['step1', 'step2', 'step3', 'step4'];
+        const stepTitles = ['Document Upload', 'Selfie Verification', 'AI Processing', 'Complete'];
+        
+        function updateProgress() {
+            const progress = (currentStep / (steps.length - 1)) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            steps.forEach((stepId, index) => {
+                const element = document.getElementById(stepId);
+                element.classList.remove('active', 'completed');
+                
+                if (index < currentStep) {
+                    element.classList.add('completed');
+                } else if (index === currentStep) {
+                    element.classList.add('active');
+                }
+            });
+            
+            document.getElementById('status').textContent = 
+                currentStep < steps.length - 1 
+                    ? `Current step: ${stepTitles[currentStep]}` 
+                    : 'Verification completed successfully!';
+        }
+        
+        function startVerification() {
+            document.getElementById('startBtn').style.display = 'none';
+            currentStep = 0;
+            updateProgress();
+            
+            // Simulate progression through steps
+            const interval = setInterval(() => {
+                currentStep++;
+                updateProgress();
+                
+                if (currentStep >= steps.length - 1) {
+                    clearInterval(interval);
+                    document.getElementById('completeBtn').style.display = 'inline-block';
+                    
+                    // Notify parent window
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'KYC_SUCCESS',
+                            sessionId: new URLSearchParams(window.location.search).get('session_id'),
+                            status: 'completed'
+                        }, '*');
+                    }
+                }
+            }, 2000); // 2 seconds per step
+        }
+        
+        function completeVerification() {
+            if (window.opener) {
+                window.opener.postMessage({
+                    type: 'KYC_SUCCESS',
+                    sessionId: new URLSearchParams(window.location.search).get('session_id'),
+                    status: 'completed'
+                }, '*');
+            }
+            window.close();
+        }
+        
+        // Initialize
+        updateProgress();
+        
+        // Get session ID from URL
+        const sessionId = new URLSearchParams(window.location.search).get('session_id');
+        if (sessionId) {
+            document.getElementById('status').textContent = `Session ID: ${sessionId}`;
+        }
+    </script>
+</body>
+</html>

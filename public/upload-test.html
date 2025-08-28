@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .upload-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        input[type="file"] { margin: 10px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .result { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+    </style>
+</head>
+<body>
+    <h1>KYC File Upload Test</h1>
+    
+    <form id="uploadForm">
+        <div class="upload-section">
+            <h3>Government ID</h3>
+            <input type="file" id="governmentId" name="governmentId" accept=".jpg,.jpeg,.png,.pdf">
+        </div>
+        
+        <div class="upload-section">
+            <h3>Selfie with ID</h3>
+            <input type="file" id="selfieWithId" name="selfieWithId" accept=".jpg,.jpeg,.png">
+        </div>
+        
+        <div class="upload-section">
+            <h3>Address Proof</h3>
+            <input type="file" id="addressProof" name="addressProof" accept=".jpg,.jpeg,.png,.pdf">
+        </div>
+        
+        <button type="button" onclick="uploadFiles()">Upload Files</button>
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+        function addResult(content, type = 'result') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong><pre>${JSON.stringify(content, null, 2)}</pre>`;
+            document.getElementById('results').appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function uploadFiles() {
+            try {
+                const formData = new FormData();
+                formData.append('userId', 'test-user-' + Date.now());
+                
+                const files = ['governmentId', 'selfieWithId', 'addressProof'];
+                let hasFiles = false;
+                
+                files.forEach(fieldName => {
+                    const fileInput = document.getElementById(fieldName);
+                    if (fileInput.files[0]) {
+                        formData.append(fieldName, fileInput.files[0]);
+                        hasFiles = true;
+                    }
+                });
+                
+                if (!hasFiles) {
+                    addResult({error: 'Please select at least one file to upload'}, 'error');
+                    return;
+                }
+                
+                addResult({status: 'Uploading files...'}, 'result');
+                
+                const response = await fetch('http://localhost:5000/api/kyc/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                addResult(data, response.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                addResult({error: error.message}, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
