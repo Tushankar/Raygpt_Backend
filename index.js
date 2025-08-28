@@ -18,7 +18,8 @@ dotenv.config();
 // Validate required environment variables
 const requiredEnvVars = [
   "FIREBASE_PROJECT_ID",
-  "FIREBASE_SERVICE_ACCOUNT_KEY",
+  "FIREBASE_PRIVATE_KEY",
+  "FIREBASE_CLIENT_EMAIL",
   "JWT_SECRET",
   "FRONTEND_URL",
 ];

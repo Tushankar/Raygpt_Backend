@@ -86,7 +86,11 @@ The following environment variables are required:
 ### Required
 
 - `FIREBASE_PROJECT_ID`: Firebase project ID
-- `FIREBASE_SERVICE_ACCOUNT_KEY`: Path to Firebase service account key JSON file
+- `FIREBASE_PRIVATE_KEY_ID`: Firebase private key ID
+- `FIREBASE_PRIVATE_KEY`: Firebase private key (with \n for line breaks)
+- `FIREBASE_CLIENT_EMAIL`: Firebase service account email
+- `FIREBASE_CLIENT_ID`: Firebase client ID
+- `FIREBASE_CLIENT_X509_CERT_URL`: Firebase certificate URL
 - `JWT_SECRET`: Secret key for JWT token signing
 - `FRONTEND_URL`: Frontend application URL for CORS and redirects
 
@@ -145,6 +149,29 @@ For production deployment, ensure you:
 - Use production API keys and secrets
 - Configure proper email settings
 - Set up Stripe webhook endpoints with production secrets
+
+### Render Deployment
+
+For deploying to Render:
+
+1. **Connect your repository to Render**
+2. **Set environment variables in Render dashboard:**
+   - Go to your service settings
+   - Add all environment variables from your `.env` file
+   - **Important**: For `FIREBASE_PRIVATE_KEY`, make sure to include the full key with `\n` for line breaks
+3. **Set build command:** `npm install`
+4. **Set start command:** `npm start`
+5. **Deploy**
+
+**Firebase Environment Variables for Render:**
+```
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PRIVATE_KEY_ID=your-private-key-id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour-key-here\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=your-service-account@project.iam.gserviceaccount.com
+FIREBASE_CLIENT_ID=your-client-id
+FIREBASE_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/your-service-account
+```
 
 ### Security Considerations
 
