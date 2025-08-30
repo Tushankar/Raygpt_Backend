@@ -1,16 +1,33 @@
 import { db, collections } from "../config/firebase.js";
 import dotenv from "dotenv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Load environment variables
 dotenv.config();
 
 /**
- * Business Manual Service - Handle business manual submissions and responses
+ * Advanced Gemini-Powered Business Manual Service
+ * Uses Google's Gemini 2.0 Flash Experimental model with sophisticated prompt engineering
  */
 export class BusinessManualService {
-  /**
-   * Submit a new business manual request
-   */
+  constructor() {
+    // Initialize Google Generative AI
+    this.genAI = new GoogleGenerativeAI(process.env.GOOGLE_CLOUD_API_KEY);
+
+    // AI model configurations
+    this.models = {
+      analysis: {
+        name: "gemini-2.5-flash",
+        config: {
+          temperature: 0.2, // Lower for more precise business analysis
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 8192,
+          responseMimeType: "text/plain",
+        },
+      },
+    };
+  }
   static async submitBusinessManual(submissionData) {
     try {
       const submissionRef = db
@@ -33,75 +50,59 @@ export class BusinessManualService {
   }
 
   /**
-   * Generate business manual response using OpenRouter (Mistral AI)
+   * Generate business manual response using Google Gemini AI SDK
    */
   static async generateBusinessManual(submissionData) {
     try {
-      const prompt = this.buildBusinessManualPrompt(submissionData);
+      const service = new BusinessManualService();
+      const prompt = service.buildBusinessManualPrompt(submissionData);
 
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "mistralai/mistral-7b-instruct:free",
-            messages: [
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            max_tokens: 4000,
-            temperature: 0.7,
-          }),
-        }
-      );
+      // Get the model
+      const model = service.genAI.getGenerativeModel({
+        model: service.models.analysis.name,
+        generationConfig: service.models.analysis.config,
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("OpenRouter API Error Details:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-        });
+      // Generate content
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const generatedContent = response.text();
 
-        let errorMessage = `OpenRouter API error: ${response.status} ${response.statusText}`;
-
-        if (response.status === 401) {
-          errorMessage =
-            "Invalid API key. Please check your OpenRouter API key configuration.";
-        } else if (response.status === 403) {
-          errorMessage =
-            "API key does not have permission to access this resource.";
-        } else if (response.status === 429) {
-          errorMessage = "API rate limit exceeded. Please try again later.";
-        } else if (response.status >= 500) {
-          errorMessage = "OpenRouter API server error. Please try again later.";
-        } else if (errorData.error?.message) {
-          errorMessage += `. ${errorData.error.message}`;
-        }
-
-        throw new Error(errorMessage);
+      if (!generatedContent || generatedContent.trim().length === 0) {
+        throw new Error("Empty response from Gemini API");
       }
-
-      const data = await response.json();
-      const generatedContent = data.choices[0].message.content;
 
       return { success: true, data: generatedContent };
     } catch (error) {
       console.error("Error generating business manual:", error);
-      return { success: false, error: error.message };
+
+      let errorMessage = "Failed to generate business manual";
+
+      if (error.message.includes("API_KEY")) {
+        errorMessage =
+          "Invalid API key. Please check your GOOGLE_CLOUD_API_KEY configuration.";
+      } else if (
+        error.message.includes("quota") ||
+        error.message.includes("rate")
+      ) {
+        errorMessage = "API rate limit exceeded. Please try again later.";
+      } else if (
+        error.message.includes("network") ||
+        error.message.includes("fetch")
+      ) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+
+      return { success: false, error: errorMessage };
     }
   }
 
   /**
-   * Build the prompt for Mistral AI based on submission data
+   * Build the prompt for Gemini AI based on submission data
    */
-  static buildBusinessManualPrompt(submissionData) {
+  buildBusinessManualPrompt(submissionData) {
     return `Generate a comprehensive business manual for the following business. The response should be structured as a complete business guide with detailed sections, similar to professional business consulting reports.
 
 Business Details:
