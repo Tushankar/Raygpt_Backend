@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendly Integration Status</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0; }
+        .status-good { color: #28a745; }
+        .status-bad { color: #dc3545; }
+        .status-warning { color: #ffc107; }
+        .code { background: #f1f3f4; padding: 10px; border-radius: 4px; font-family: monospace; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .refresh { float: right; }
+    </style>
+</head>
+<body>
+    <h1>🔗 Calendly Integration Status Monitor</h1>
+    
+    <div class="card">
+        <h2>📊 Current Configuration</h2>
+        <div id="config-status">Loading...</div>
+        <button onclick="loadConfig()" class="refresh">Refresh Config</button>
+    </div>
+
+    <div class="card">
+        <h2>📋 Latest Prequalifications</h2>
+        <div id="leads-status">Loading...</div>
+        <button onclick="loadLeads()" class="refresh">Refresh Leads</button>
+    </div>
+
+    <div class="card">
+        <h2>🧪 Quick Tests</h2>
+        <button onclick="testWebhook()">Test Webhook</button>
+        <button onclick="markLatestAsBooked()">Mark Latest as Booked</button>
+        <button onclick="resetLatestBooking()">Reset Latest Booking</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="card">
+        <h2>📝 Instructions</h2>
+        <p><strong>🔄 To update ngrok URL:</strong></p>
+        <ol>
+            <li>Update <code>NGROK_URL</code> in your <code>server/.env</code> file</li>
+            <li>Restart your server with <code>npm start</code></li>
+            <li>Configure Calendly webhook URL to: <span id="webhook-url-instruction">...</span></li>
+            <li>Test with pre-qualification form → Book appointment → Check status</li>
+        </ol>
+        <div class="code">
+            <strong>Current .env setting:</strong><br>
+            NGROK_URL=<span id="current-ngrok-url">...</span>
+        </div>
+    </div>
+
+    <script>
+        let latestLeadId = null;
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/calendly/webhook-info');
+                const data = await response.json();
+                document.getElementById('config-status').innerHTML = `
+                    <p><strong>Ngrok URL:</strong> <span class="status-good">${data.currentNgrokUrl}</span></p>
+                    <p><strong>Webhook URL:</strong> <code>${data.webhookUrls.ngrok.production}</code></p>
+                    <p><strong>Test URL:</strong> <code>${data.webhookUrls.ngrok.test}</code></p>
+                `;
+                document.getElementById('webhook-url').textContent = data.webhookUrls.ngrok.production;
+            } catch (error) {
+                document.getElementById('config-status').innerHTML = `<p class="status-bad">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function loadLeads() {
+            try {
+                const response = await fetch('/api/prequal?limit=5');
+                const leads = await response.json();
+                let html = '<table border="1" style="width: 100%; border-collapse: collapse;"><tr><th>Lead ID</th><th>Name</th><th>Email</th><th>Booked</th><th>Updated</th></tr>';
+                
+                leads.forEach(lead => {
+                    const bookedStatus = lead.appointmentBooked ? 
+                        '<span class="status-good">✅ Booked</span>' : 
+                        '<span class="status-bad">❌ Not Booked</span>';
+                    html += `<tr>
+                        <td>${lead.leadId}</td>
+                        <td>${lead.name || 'N/A'}</td>
+                        <td>${lead.email}</td>
+                        <td>${bookedStatus}</td>
+                        <td>${new Date(lead.updatedAt || lead.createdAt).toLocaleString()}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                
+                document.getElementById('leads-status').innerHTML = html;
+                if (leads.length > 0) {
+                    latestLeadId = leads[0].leadId;
+                }
+            } catch (error) {
+                document.getElementById('leads-status').innerHTML = `<p class="status-bad">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function testWebhook() {
+            if (!latestLeadId) {
+                alert('No leads found. Please load leads first.');
+                return;
+            }
+
+            const payload = {
+                event: "invitee.created",
+                payload: {
+                    invitee: {
+                        email: "tushankarsaha0@gmail.com",
+                        uri: `https://calendly.com/sahatushankar234/30min?leadId=${latestLeadId}&email=tushankarsaha0%40gmail.com`
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch('/api/calendly/webhook-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                document.getElementById('test-results').innerHTML = `
+                    <div class="code">Webhook Test Result: ${JSON.stringify(result, null, 2)}</div>
+                `;
+                loadLeads(); // Refresh leads
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<p class="status-bad">Test failed: ${error.message}</p>`;
+            }
+        }
+
+        async function markLatestAsBooked() {
+            if (!latestLeadId) {
+                alert('No leads found. Please load leads first.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/calendly/mark-booked', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leadId: latestLeadId })
+                });
+                const result = await response.json();
+                document.getElementById('test-results').innerHTML = `
+                    <div class="code">Manual Booking Result: ${JSON.stringify(result, null, 2)}</div>
+                `;
+                loadLeads(); // Refresh leads
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<p class="status-bad">Manual booking failed: ${error.message}</p>`;
+            }
+        }
+
+        async function resetLatestBooking() {
+            if (!latestLeadId) {
+                alert('No leads found. Please load leads first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/debug/reset-booking/${latestLeadId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                document.getElementById('test-results').innerHTML = `
+                    <div class="code">Reset Result: ${JSON.stringify(result, null, 2)}</div>
+                `;
+                loadLeads(); // Refresh leads
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = `<p class="status-bad">Reset failed: ${error.message}</p>`;
+            }
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadLeads();
+        }, 30000);
+
+        // Load initial data
+        loadConfig();
+        loadLeads();
+    </script>
+</body>
+</html>

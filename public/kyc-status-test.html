@@ -28,7 +28,19 @@
     <div id="results"></div>
 
     <script>
-        const API_BASE = 'http://localhost:5000/api/kyc';
+        // Get base URL from server
+        let API_BASE = 'http://localhost:5000/api/kyc';
+        
+        // Try to get webhook info to determine the correct URL
+        fetch('/api/calendly/webhook-info')
+            .then(response => response.json())
+            .then(data => {
+                if (data.ngrokUrl && data.ngrokUrl !== 'Not configured') {
+                    API_BASE = `${data.ngrokUrl}/api/kyc`;
+                    console.log('Using ngrok URL:', API_BASE);
+                }
+            })
+            .catch(console.error);
         
         function addResult(content, type = 'result') {
             const div = document.createElement('div');

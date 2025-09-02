@@ -97,7 +97,10 @@ The following environment variables are required:
 ### API Keys
 
 - `DIDIT_API_KEY`: API key for DIDit KYC verification service
-- `GOOGLE_CLOUD_API_KEY`: API key for Google Cloud Generative AI service (get from [Google Cloud Console](https://console.cloud.google.com/))
+- `GOOGLE_CLOUD_API_KEY`: API key for Google Cloud Generative AI service
+  - Get from: https://console.cloud.google.com/
+  - Enable: Generative AI API
+  - Create: API Key in Credentials section
 - `STRIPE_SECRET_KEY`: Stripe secret key for payment processing
 - `STRIPE_WEBHOOK_SECRET`: Stripe webhook secret for payment verification
 

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 
 // Import routes
 import userRoutes from "./routes/users.js";
@@ -11,6 +12,10 @@ import packagesRoutes from "./routes/packages.js";
 import stripeRoutes from "./routes/stripe.js";
 import storeRequestRoutes from "./routes/storeRequests.js";
 import expertRequestRoutes from "./routes/expertRequests.js";
+import subscribeRoutes from "./routes/subscribe.js";
+import prequalRoutes from "./routes/prequal.js";
+import calendlyRoutes from "./routes/calendly.js";
+import debugRoutes from "./routes/debug.js";
 
 // Load environment variables
 dotenv.config();
@@ -90,6 +95,45 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS =
+  parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000; // 15 minutes
+const RATE_LIMIT_MAX_REQUESTS =
+  parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100;
+
+// General API rate limiter
+const generalLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: RATE_LIMIT_MAX_REQUESTS,
+  message: {
+    success: false,
+    error: "Too many requests from this IP, please try again later.",
+    retryAfter: Math.ceil(RATE_LIMIT_WINDOW_MS / 1000),
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Strict limiter for business manual generation (resource-intensive)
+const businessManualLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: 10, // Allow only 10 business manual generations per window
+  message: {
+    success: false,
+    error:
+      "Business manual generation limit exceeded. Please try again in 15 minutes.",
+    retryAfter: Math.ceil(RATE_LIMIT_WINDOW_MS / 1000),
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply general rate limiting to all API routes
+app.use("/api/", generalLimiter);
+
+// Apply strict rate limiting to business manual generation (resource-intensive)
+app.use("/api/business-manual/generate", businessManualLimiter);
+
 // Serve static files for testing
 app.use("/test", express.static("public"));
 
@@ -101,6 +145,10 @@ app.use("/api/packages", packagesRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/store-requests", storeRequestRoutes);
 app.use("/api/expert-requests", expertRequestRoutes);
+app.use("/api/subscribe", subscribeRoutes);
+app.use("/api/prequal", prequalRoutes);
+app.use("/api/calendly", calendlyRoutes);
+app.use("/api/debug", debugRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

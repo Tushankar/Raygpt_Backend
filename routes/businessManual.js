@@ -52,10 +52,14 @@ router.get("/user/:userId", async (req, res) => {
     const { userId } = req.params;
     const { limit = 10 } = req.query;
 
+    console.log("GET /user/:userId called with:", { userId, limit });
+
     const result = await BusinessManualService.getSubmissionsByUser(
       userId,
       parseInt(limit)
     );
+
+    console.log("Service result:", result);
 
     if (result.success) {
       res.json({ success: true, submissions: result.data });
@@ -63,6 +67,72 @@ router.get("/user/:userId", async (req, res) => {
       res.status(400).json({ success: false, error: result.error });
     }
   } catch (error) {
+    console.error("Route error:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
+// GET /api/business-manual/test/all - Get all submissions for testing
+router.get("/test/all", async (req, res) => {
+  try {
+    console.log("Getting all submissions for testing...");
+
+    const { db, collections } = await import("../config/firebase.js");
+    const querySnapshot = await db
+      .collection(collections.BUSINESS_MANUAL_SUBMISSION)
+      .limit(10)
+      .get();
+
+    const submissions = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log("All submissions found:", submissions.length);
+    res.json({ success: true, count: submissions.length, submissions });
+  } catch (error) {
+    console.error("Test route error:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/business-manual/responses/user/:userId - Get responses by user
+router.get("/responses/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { limit = 10 } = req.query;
+
+    console.log("GET /responses/user/:userId called with:", { userId, limit });
+
+    const { db, collections } = await import("../config/firebase.js");
+
+    // Simple query without ordering to avoid index requirement
+    const querySnapshot = await db
+      .collection(collections.BUSINESS_MANUAL_RESPONSE)
+      .where("userId", "==", userId)
+      .limit(parseInt(limit))
+      .get();
+
+    const responses = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Sort in JavaScript after fetching to avoid Firestore index requirement
+    responses.sort((a, b) => {
+      const dateA = new Date(a.generatedAt || a.createdAt || 0);
+      const dateB = new Date(b.generatedAt || b.createdAt || 0);
+      return dateB - dateA; // Newest first
+    });
+
+    console.log("Found responses:", responses.length);
+    console.log(
+      "Sample response data:",
+      responses[0] ? JSON.stringify(responses[0], null, 2) : "No responses"
+    );
+    res.json({ success: true, responses });
+  } catch (error) {
+    console.error("Responses route error:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
@@ -147,7 +217,7 @@ router.get("/responses/user/:userId", async (req, res) => {
     const { userId } = req.params;
     const { limit = 10 } = req.query;
 
-    const result = await BusinessManualService.getResponsesByUser(
+    const result = await BusinessManualService.getUserResponses(
       userId,
       parseInt(limit)
     );
