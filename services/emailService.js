@@ -5,22 +5,37 @@ dotenv.config();
 
 // Configure transporter using env vars. For Gmail app password, ensure
 // EMAIL_USER and EMAIL_PASS are set in the server environment (.env).
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+} else {
+  console.warn(
+    "⚠️ EMAIL_USER or EMAIL_PASS not set. Outgoing emails are disabled. Set these in your .env to enable email sends."
+  );
+}
 
-function sendMail({ to, subject, text, html }) {
+function sendMail({ to, subject, text, html, attachments }) {
+  if (!transporter) {
+    console.warn(
+      `sendMail skipped - transporter not configured. to=${to} subject=${subject}`
+    );
+    return Promise.resolve({ skipped: true });
+  }
+
   const from = process.env.EMAIL_FROM || process.env.EMAIL_USER;
   const mail = {
     from,
     to,
     subject,
-    text: text || html?.replace(/<[^>]+>/g, "") || "",
+    text: text || (html ? html.replace(/<[^>]+>/g, "") : "") || "",
     html: html || undefined,
+    attachments: attachments || undefined,
   };
 
   return transporter.sendMail(mail);
@@ -176,11 +191,17 @@ export async function scheduleEmailSequence({ email, name }, options = {}) {
     setTimeout(async () => {
       try {
         const rendered = item.render(name, email);
+        // Ensure every email includes a booking link (use env fallback)
+        const bookingLink =
+          process.env.BOOKING_LINK || `${FRONTEND_URL}/book-call`;
+        const textWithLink = `${rendered.text}\n\nBook a call: ${bookingLink}`;
+        const htmlWithLink = `${rendered.html}\n<p style="margin-top:12px"><a href=\"${bookingLink}\" style=\"background:#E4631F;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none\">Book a Call</a></p>`;
+
         await sendMail({
           to: email,
           subject: item.subject,
-          text: rendered.text,
-          html: rendered.html,
+          text: textWithLink,
+          html: htmlWithLink,
         });
         console.log(
           `Email ${idx + 1} sent to ${email} (subject: ${item.subject})`
