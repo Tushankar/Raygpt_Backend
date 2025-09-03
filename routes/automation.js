@@ -6,6 +6,20 @@ import automationEmailService from "../services/automationEmailService.js";
 
 const router = express.Router();
 
+// DEBUG: dump some documents from prequalifications for troubleshooting
+router.get("/debug-list", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 50;
+    const snap = await db.collection("prequalifications").limit(limit).get();
+    const items = [];
+    snap.forEach((doc) => items.push({ id: doc.id, data: doc.data() }));
+    res.json({ success: true, items });
+  } catch (err) {
+    console.error("debug-list error:", err);
+    res.status(500).json({ success: false, error: String(err) });
+  }
+});
+
 // GET /api/automation/not-booked - list leads who have not booked
 router.get("/not-booked", async (req, res) => {
   try {
@@ -20,6 +34,8 @@ router.get("/not-booked", async (req, res) => {
     const items = [];
     snap.forEach((doc) => {
       const d = doc.data();
+      // Return all leads that have not booked an appointment. Include automationSent
+      // field in the response so the UI can decide whether to auto-trigger.
       if (!d.appointmentBooked) {
         items.push({ id: doc.id, ...d });
       }
@@ -47,6 +63,14 @@ router.post("/trigger", async (req, res) => {
       return res.status(404).json({ success: false, error: "Lead not found" });
 
     const data = doc.data();
+    // Idempotency: if we've already sent automation for this lead, skip scheduling again
+    if (data.automationSent) {
+      return res.json({
+        success: true,
+        triggered: false,
+        message: "Automation already sent",
+      });
+    }
     const email = data.email;
     const name = data.name;
     const phone = data.phone;
@@ -105,6 +129,18 @@ router.post("/trigger", async (req, res) => {
         .catch((e) => console.error(e));
     }
 
+    // Persist that we've triggered automation for this lead so it won't be
+    // included in future "not-booked" lists.
+    try {
+      await db.collection("prequalifications").doc(id).update({
+        automationSent: true,
+        automationSentAt: new Date().toISOString(),
+      });
+    } catch (uErr) {
+      // Log update error but still return success since emails/sms were scheduled
+      console.error("Failed to persist automationSent flag for", id, uErr);
+    }
+
     res.json({ success: true, triggered: true });
   } catch (err) {
     console.error("Automation trigger error:", err.stack || err);
@@ -112,6 +148,33 @@ router.post("/trigger", async (req, res) => {
     // Include server error message for debugging (temporary)
     payload.detail = err.message || String(err);
     res.status(500).json(payload);
+  }
+});
+
+// POST /api/automation/mark-sent - mark multiple leads as automationSent without sending emails
+router.post("/mark-sent", async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Missing ids array" });
+    }
+
+    const batch = db.batch();
+    ids.forEach((id) => {
+      const ref = db.collection("prequalifications").doc(id);
+      batch.update(ref, {
+        automationSent: true,
+        automationSentAt: new Date().toISOString(),
+      });
+    });
+
+    await batch.commit();
+    res.json({ success: true, marked: ids.length });
+  } catch (err) {
+    console.error("mark-sent error:", err);
+    res.status(500).json({ success: false, error: String(err) });
   }
 });
 

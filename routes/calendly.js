@@ -275,6 +275,7 @@ router.post("/webhook", async (req, res) => {
     console.log("[calendly] 🎯 REAL WEBHOOK RECEIVED");
     console.log("[calendly] Full payload:", JSON.stringify(event, null, 2));
     console.log("[calendly] Headers:", JSON.stringify(req.headers, null, 2));
+    console.log("[calendly] Timestamp:", new Date().toISOString());
 
     // Check signature for debugging
     const signature = req.headers["calendly-webhook-signature"];
