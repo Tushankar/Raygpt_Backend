@@ -3,7 +3,7 @@
 // Comprehensive test script for Calendly integration
 // Run with: node test-integration.js
 
-const baseUrl = "http://localhost:5000";
+const baseUrl = "https://raygpt-backend-2.onrender.com";
 const ngrokUrl = process.env.NGROK_URL || "https://ce387d550d47.ngrok-free.app";
 
 async function test(name, url, options = {}) {

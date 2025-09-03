@@ -75,10 +75,16 @@ router.post("/trigger", async (req, res) => {
     const name = data.name;
     const phone = data.phone;
 
-    const link =
+    let link =
       bookingLink ||
       process.env.BOOKING_LINK ||
       `${process.env.FRONTEND_URL}/book-call`;
+
+    // Add leadId parameter to the booking link for webhook matching
+    if (id) {
+      const separator = link.includes("?") ? "&" : "?";
+      link = `${link}${separator}leadId=${encodeURIComponent(id)}`;
+    }
 
     // Send confirmation email immediately with optional calendar invite attachment
     const rendered = {
@@ -119,13 +125,18 @@ router.post("/trigger", async (req, res) => {
 
     // schedule the tailored 3-email automation sequence
     automationEmailService
-      .scheduleThreeEmailSequence({ email, name, bookingLink: link })
+      .scheduleThreeEmailSequence({
+        email,
+        name,
+        bookingLink: link,
+        leadId: id,
+      })
       .catch((e) => console.error(e));
 
     // SMS sequence if phone present and Twilio configured
     if (phone) {
       smsService
-        .scheduleSmsSequence({ to: phone, bookingLink: link })
+        .scheduleSmsSequence({ to: phone, bookingLink: link, leadId: id })
         .catch((e) => console.error(e));
     }
 

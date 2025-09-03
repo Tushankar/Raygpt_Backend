@@ -69,15 +69,24 @@ export async function sendSms({ to, body }) {
 }
 
 // Simple scheduler for short demo sequences. For production use a job queue.
-export async function scheduleSmsSequence({ to, bookingLink }, options = {}) {
+export async function scheduleSmsSequence(
+  { to, bookingLink, leadId },
+  options = {}
+) {
   // Default to randomized short delays 10-15 seconds for testing
   const minSec = options.minSec || 10;
   const maxSec = options.maxSec || 15;
 
-  const link =
+  let link =
     bookingLink ||
     process.env.BOOKING_LINK ||
     `${process.env.FRONTEND_URL}/book-call`;
+
+  // Add leadId parameter to the booking link for webhook matching
+  if (leadId) {
+    const separator = link.includes("?") ? "&" : "?";
+    link = `${link}${separator}leadId=${encodeURIComponent(leadId)}`;
+  }
 
   const bodies = [
     `Thanks for your interest — book a quick call: ${link}`,

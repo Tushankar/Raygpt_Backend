@@ -50,32 +50,36 @@ router.get("/test", (req, res) =>
 // Get webhook configuration info
 router.get("/webhook-info", (req, res) => {
   const ngrokUrl = process.env.NGROK_URL || "Not configured";
-  const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
+  const serverUrl =
+    process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
+
+  // Use Render URL as primary since we're deployed
+  const primaryUrl = serverUrl;
 
   const webhookUrls = {
+    render: {
+      production: `${primaryUrl}/api/calendly/webhook`,
+      test: `${primaryUrl}/api/calendly/webhook-test`,
+      debug: `${primaryUrl}/api/debug/prequal`,
+    },
     ngrok: {
       production: `${ngrokUrl}/api/calendly/webhook`,
       test: `${ngrokUrl}/api/calendly/webhook-test`,
       debug: `${ngrokUrl}/api/debug/prequal`,
     },
-    local: {
-      production: `${serverUrl}/api/calendly/webhook`,
-      test: `${serverUrl}/api/calendly/webhook-test`,
-      debug: `${serverUrl}/api/debug/prequal`,
-    },
   };
 
   res.json({
     success: true,
-    currentNgrokUrl: ngrokUrl,
-    webhookUrl: `${ngrokUrl}/api/calendly/webhook`,
-    testUrl: `${ngrokUrl}/api/calendly/webhook-test`,
-    ngrokUrl: ngrokUrl,
+    currentServerUrl: serverUrl,
+    webhookUrl: `${primaryUrl}/api/calendly/webhook`,
+    testUrl: `${primaryUrl}/api/calendly/webhook-test`,
+    renderUrl: primaryUrl,
     webhookUrls,
     instructions: {
-      calendlySetup: `Configure Calendly webhook to: ${ngrokUrl}/api/calendly/webhook`,
-      updateNgrok: "Update NGROK_URL in .env file when ngrok URL changes",
-      testEndpoint: `Test with: ${ngrokUrl}/api/calendly/webhook-test`,
+      calendlySetup: `Configure Calendly webhook to: ${primaryUrl}/api/calendly/webhook`,
+      updateServer: "Using Render deployment URL as primary webhook endpoint",
+      testEndpoint: `Test with: ${primaryUrl}/api/calendly/webhook-test`,
     },
   });
 });
@@ -383,7 +387,8 @@ router.get("/oauth/callback", (req, res) => {
 
 // Start OAuth flow
 router.get("/oauth/start", (req, res) => {
-  const ngrokUrl = process.env.NGROK_URL || "http://localhost:5000";
+  const serverUrl =
+    process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
   const clientId = process.env.CALENDLY_CLIENT_ID;
 
   const authURL =
@@ -391,7 +396,7 @@ router.get("/oauth/start", (req, res) => {
     `client_id=${clientId}&` +
     `response_type=code&` +
     `redirect_uri=${encodeURIComponent(
-      ngrokUrl + "/api/calendly/oauth/callback"
+      serverUrl + "/api/calendly/oauth/callback"
     )}&` +
     `scope=webhook_subscription_write`;
 

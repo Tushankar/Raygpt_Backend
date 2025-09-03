@@ -3,11 +3,17 @@ import emailService from "./emailService.js";
 // 3-email sequence for 'filled but didn't book' automation
 // Uses emailService.sendMail for delivery. Delays are configurable (seconds).
 
-function makeTemplates(name, bookingLink) {
-  const link =
+function makeTemplates(name, bookingLink, leadId) {
+  let link =
     bookingLink ||
     process.env.BOOKING_LINK ||
     `${process.env.FRONTEND_URL}/book-call`;
+
+  // Add leadId parameter to the booking link for webhook matching
+  if (leadId) {
+    const separator = link.includes("?") ? "&" : "?";
+    link = `${link}${separator}leadId=${encodeURIComponent(leadId)}`;
+  }
 
   const t1 = {
     subject: "Thanks — here's a quick next step",
@@ -58,7 +64,7 @@ function randDelaySec(min = 10, max = 15) {
 }
 
 export async function scheduleThreeEmailSequence(
-  { email, name, bookingLink },
+  { email, name, bookingLink, leadId },
   options = {}
 ) {
   // For quick testing use randomized delays of 10-15 seconds per message
@@ -69,7 +75,8 @@ export async function scheduleThreeEmailSequence(
     name,
     bookingLink ||
       process.env.BOOKING_LINK ||
-      `${process.env.FRONTEND_URL}/book-call`
+      `${process.env.FRONTEND_URL}/book-call`,
+    leadId
   );
 
   let cumulative = 0;

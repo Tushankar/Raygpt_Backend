@@ -5,7 +5,8 @@
 
 import fetch from "node-fetch";
 
-const SERVER_URL = process.env.SERVER_URL || "http://localhost:5000";
+const SERVER_URL =
+  process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
 
 // Test data
 const testData = {
