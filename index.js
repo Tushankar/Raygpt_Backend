@@ -130,10 +130,10 @@ const businessManualLimiter = rateLimit({
 });
 
 // Apply general rate limiting to all API routes
-app.use("/api/", generalLimiter);
+// app.use("/api/", generalLimiter);
 
 // Apply strict rate limiting to business manual generation (resource-intensive)
-app.use("/api/business-manual/generate", businessManualLimiter);
+// app.use("/api/business-manual/generate", businessManualLimiter);
 
 // Serve static files for testing
 app.use("/test", express.static("public"));
