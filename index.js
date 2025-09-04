@@ -81,14 +81,21 @@ app.use(
         process.env.FRONTEND_URL,
       ].filter(Boolean);
 
+      console.log(`[CORS] Request from origin: ${origin}`);
+      console.log(`[CORS] Allowed origins:`, allowedOrigins);
+
       if (allowedOrigins.includes(origin)) {
+        console.log(`[CORS] ✅ Origin allowed: ${origin}`);
         callback(null, true);
       } else {
+        console.log(`[CORS] ❌ Origin rejected: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
     optionsSuccessStatus: 200,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
   })
 );
 
@@ -158,6 +165,16 @@ app.get("/health", (req, res) => {
     status: "OK",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// CORS test endpoint
+app.get("/api/test-cors", (req, res) => {
+  res.json({
+    success: true,
+    message: "CORS is working!",
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString(),
   });
 });
 
