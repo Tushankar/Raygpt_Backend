@@ -17,10 +17,15 @@ router.post("/submit", authenticateJWT, async (req, res) => {
 
     // Debug logging
     console.log("Review submission debug:");
+    console.log("req.headers['content-type']:", req.headers['content-type']);
     console.log("req.body:", req.body);
+    console.log("req.body type:", typeof req.body);
+    console.log("req.body keys:", Object.keys(req.body || {}));
+    console.log("JSON.stringify(req.body):", JSON.stringify(req.body));
     console.log("req.user:", req.user);
     console.log("userId:", userId);
     console.log("rating:", rating);
+    console.log("rating type:", typeof rating);
 
     if (!userId) {
       return res.status(401).json({
