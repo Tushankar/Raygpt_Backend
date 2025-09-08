@@ -22,20 +22,20 @@ export const authenticateJWT = async (req, res, next) => {
     try {
       // Try to verify as Firebase ID token first
       const decodedToken = await admin.auth().verifyIdToken(token);
-      
+
       // Debug logging
       console.log("Firebase token decoded successfully:");
       console.log("decodedToken.uid:", decodedToken.uid);
       console.log("decodedToken.email:", decodedToken.email);
       console.log("decodedToken.name:", decodedToken.name);
-      
+
       req.user = {
         uid: decodedToken.uid,
         email: decodedToken.email,
         name: decodedToken.name,
         emailVerified: decodedToken.email_verified,
       };
-      
+
       console.log("req.user set to:", req.user);
       next();
     } catch (firebaseError) {

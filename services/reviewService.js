@@ -16,7 +16,14 @@ export class ReviewService {
       } = reviewData;
 
       // Validate required fields
+      console.log("ReviewService.createReview - validating fields:");
+      console.log("userId:", userId, typeof userId);
+      console.log("rating:", rating, typeof rating);
+      console.log("userId truthy?", !!userId);
+      console.log("rating truthy?", !!rating);
+
       if (!userId || !rating) {
+        console.log("Validation failed - missing userId or rating");
         return {
           success: false,
           error: "User ID and rating are required",
