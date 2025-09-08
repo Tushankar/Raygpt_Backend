@@ -197,7 +197,10 @@ router.put("/admin/:reviewId/approve", authenticateJWT, async (req, res) => {
     const { reviewId } = req.params;
     const { isApproved } = req.body;
 
-    const result = await ReviewService.updateReviewApproval(reviewId, isApproved);
+    const result = await ReviewService.updateReviewApproval(
+      reviewId,
+      isApproved
+    );
 
     if (result.success) {
       res.json(result);

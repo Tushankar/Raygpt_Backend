@@ -183,14 +183,19 @@ export class ReviewService {
    */
   static async updateReviewApproval(reviewId, isApproved) {
     try {
-      await db.collection("reviews").doc(reviewId).update({
-        isApproved: Boolean(isApproved),
-        updatedAt: new Date(),
-      });
+      await db
+        .collection("reviews")
+        .doc(reviewId)
+        .update({
+          isApproved: Boolean(isApproved),
+          updatedAt: new Date(),
+        });
 
       return {
         success: true,
-        message: `Review ${isApproved ? "approved" : "unapproved"} successfully`,
+        message: `Review ${
+          isApproved ? "approved" : "unapproved"
+        } successfully`,
       };
     } catch (error) {
       console.error("Error updating review approval:", error);
@@ -238,7 +243,7 @@ export class ReviewService {
         totalReviews++;
         totalRating += data.rating;
         ratingCounts[data.rating]++;
-        
+
         if (data.isApproved) {
           approvedCount++;
         }
