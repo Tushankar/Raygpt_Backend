@@ -217,23 +217,44 @@ const EMAIL_SEQUENCE = [
   },
 ];
 
-// Schedule the sequence for a subscriber. This uses in-memory timers (setTimeout).
-// For production reliability, use a job queue (Bull, Agenda) or an external scheduler.
-export async function scheduleEmailSequence({ email, name }, options = {}) {
+// Send only the first email (manual with download) immediately
+export async function sendFirstEmail({ email, name }) {
+  try {
+    const firstEmail = EMAIL_SEQUENCE[0];
+    const rendered = firstEmail.render(name, email);
+    
+    await sendMail({
+      to: email,
+      subject: firstEmail.subject,
+      text: rendered.text,
+      html: rendered.html,
+    });
+    
+    console.log(`First email (manual) sent to ${email}`);
+    return { success: true, emailSent: firstEmail.subject };
+  } catch (err) {
+    console.error(`Failed to send first email to ${email}:`, err?.message || err);
+    throw err;
+  }
+}
+
+// Schedule the remaining email sequence (emails 2-7) after user engagement
+export async function scheduleRemainingEmails({ email, name }, options = {}) {
   // For testing, use options.testMode = true to send every 30 seconds
   const isTestMode = options.testMode || false;
 
-  // Email timing: First email immediately, then spread remaining 6 emails over 7 days
-  // Day 0 (immediate), Day 1, Day 2, Day 3, Day 4, Day 5, Day 6
+  // Skip the first email (index 0) and schedule the remaining emails
+  const remainingEmails = EMAIL_SEQUENCE.slice(1);
+
+  // Email timing: Day 1, Day 2, Day 3, Day 4, Day 5, Day 6
   let emailDelays;
   if (isTestMode) {
-    // For testing: 0, 30s, 1m, 1m30s, 2m, 2m30s, 3m
-    emailDelays = [0, 30000, 60000, 90000, 120000, 150000, 180000];
+    // For testing: 30s, 1m, 1m30s, 2m, 2m30s, 3m
+    emailDelays = [30000, 60000, 90000, 120000, 150000, 180000];
   } else {
-    // Production: 0, 1 day, 2 days, 3 days, 4 days, 5 days, 6 days
+    // Production: 1 day, 2 days, 3 days, 4 days, 5 days, 6 days
     const dayInMs = 24 * 60 * 60 * 1000;
     emailDelays = [
-      0,
       dayInMs,
       2 * dayInMs,
       3 * dayInMs,
@@ -243,8 +264,8 @@ export async function scheduleEmailSequence({ email, name }, options = {}) {
     ];
   }
 
-  // Schedule each email with its specific delay
-  EMAIL_SEQUENCE.forEach((item, idx) => {
+  // Schedule each remaining email with its specific delay
+  remainingEmails.forEach((item, idx) => {
     const delay = emailDelays[idx] || 0;
 
     setTimeout(async () => {
@@ -263,13 +284,13 @@ export async function scheduleEmailSequence({ email, name }, options = {}) {
           html: htmlWithLink,
         });
         console.log(
-          `Email ${idx + 1} sent to ${email} on day ${idx} (subject: ${
+          `Email ${idx + 2} sent to ${email} on day ${idx + 1} (subject: ${
             item.subject
           })`
         );
       } catch (err) {
         console.error(
-          `Failed to send email ${idx + 1} to ${email}:`,
+          `Failed to send email ${idx + 2} to ${email}:`,
           err?.message || err
         );
       }
@@ -279,12 +300,17 @@ export async function scheduleEmailSequence({ email, name }, options = {}) {
   const totalDurationDays = isTestMode ? "3 minutes" : "6 days";
   return {
     scheduled: true,
-    emailCount: EMAIL_SEQUENCE.length,
+    emailCount: remainingEmails.length,
     duration: totalDurationDays,
     timing: isTestMode
-      ? "Test mode: every 30 seconds"
-      : "Day 0 (immediate), then Days 1-6",
+      ? "Test mode: every 30 seconds starting in 30s"
+      : "Days 1-6",
   };
 }
 
-export default { sendMail, scheduleEmailSequence };
+// Legacy function - now only sends first email
+export async function scheduleEmailSequence({ email, name }, options = {}) {
+  return await sendFirstEmail({ email, name });
+}
+
+export default { sendMail, scheduleEmailSequence, sendFirstEmail, scheduleRemainingEmails };

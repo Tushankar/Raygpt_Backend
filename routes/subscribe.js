@@ -1,6 +1,6 @@
 import express from "express";
 import { db, collections } from "../config/firebase.js";
-import { scheduleEmailSequence } from "../services/emailService.js";
+import { scheduleEmailSequence, scheduleRemainingEmails } from "../services/emailService.js";
 import { authenticateAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -82,6 +82,53 @@ router.post("/", async (req, res) => {
     res.status(201).json({ success: true, id: docRef.id });
   } catch (error) {
     console.error("Subscribe route error:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
+// POST /api/subscribe/start-automation - start the remaining email sequence for engagement
+router.post("/start-automation", async (req, res) => {
+  try {
+    const { email, name } = req.body || {};
+
+    if (!email || typeof email !== "string") {
+      return res
+        .status(400)
+        .json({ success: false, error: "Valid email is required" });
+    }
+
+    // Check if subscriber exists
+    const subscribersQuery = await db
+      .collection("subscriptions")
+      .where("email", "==", email.toLowerCase().trim())
+      .get();
+
+    if (subscribersQuery.empty) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Email not found in subscribers" });
+    }
+
+    // Update subscriber to mark automation started
+    const subscriberDoc = subscribersQuery.docs[0];
+    await subscriberDoc.ref.update({
+      automationStarted: true,
+      automationStartedAt: new Date().toISOString(),
+    });
+
+    // Schedule the remaining email sequence (emails 2-7)
+    const result = await scheduleRemainingEmails({
+      email: email.toLowerCase().trim(),
+      name: name || null,
+    });
+
+    res.json({ 
+      success: true, 
+      message: "Email automation started",
+      ...result
+    });
+  } catch (error) {
+    console.error("Start automation route error:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
