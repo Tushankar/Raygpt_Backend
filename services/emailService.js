@@ -249,22 +249,25 @@ export async function scheduleRemainingEmails({ email, name }, options = {}) {
   // Skip the first email (index 0) and schedule the remaining emails
   const remainingEmails = EMAIL_SEQUENCE.slice(1);
 
-  // Email timing: Day 1, Day 2, Day 3, Day 4, Day 5, Day 6
+  // Email timing: For testing, send emails quickly with short delays
   let emailDelays;
   if (isTestMode) {
-    // For testing: 30s, 1m, 1m30s, 2m, 2m30s, 3m
-    emailDelays = [30000, 60000, 90000, 120000, 150000, 180000];
+    // For testing: 5s, 10s, 15s, 20s, 25s, 30s
+    emailDelays = [5000, 10000, 15000, 20000, 25000, 30000];
   } else {
-    // Production: 1 day, 2 days, 3 days, 4 days, 5 days, 6 days
-    const dayInMs = 24 * 60 * 60 * 1000;
-    emailDelays = [
-      dayInMs,
-      2 * dayInMs,
-      3 * dayInMs,
-      4 * dayInMs,
-      5 * dayInMs,
-      6 * dayInMs,
-    ];
+    // For immediate testing: 2s, 4s, 6s, 8s, 10s, 12s (change this back to days for production)
+    emailDelays = [2000, 4000, 6000, 8000, 10000, 12000];
+    
+    // Production delays (uncomment when ready for production):
+    // const dayInMs = 24 * 60 * 60 * 1000;
+    // emailDelays = [
+    //   dayInMs,
+    //   2 * dayInMs,
+    //   3 * dayInMs,
+    //   4 * dayInMs,
+    //   5 * dayInMs,
+    //   6 * dayInMs,
+    // ];
   }
 
   // Schedule each remaining email with its specific delay
@@ -300,14 +303,14 @@ export async function scheduleRemainingEmails({ email, name }, options = {}) {
     }, delay);
   });
 
-  const totalDurationDays = isTestMode ? "3 minutes" : "6 days";
+  const totalDuration = isTestMode ? "30 seconds" : "12 seconds (testing mode)";
   return {
     scheduled: true,
     emailCount: remainingEmails.length,
-    duration: totalDurationDays,
+    duration: totalDuration,
     timing: isTestMode
-      ? "Test mode: every 30 seconds starting in 30s"
-      : "Days 1-6",
+      ? "Test mode: every 5 seconds starting in 5s"
+      : "Testing mode: every 2 seconds starting in 2s",
   };
 }
 
