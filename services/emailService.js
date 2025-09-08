@@ -222,18 +222,21 @@ export async function sendFirstEmail({ email, name }) {
   try {
     const firstEmail = EMAIL_SEQUENCE[0];
     const rendered = firstEmail.render(name, email);
-    
+
     await sendMail({
       to: email,
       subject: firstEmail.subject,
       text: rendered.text,
       html: rendered.html,
     });
-    
+
     console.log(`First email (manual) sent to ${email}`);
     return { success: true, emailSent: firstEmail.subject };
   } catch (err) {
-    console.error(`Failed to send first email to ${email}:`, err?.message || err);
+    console.error(
+      `Failed to send first email to ${email}:`,
+      err?.message || err
+    );
     throw err;
   }
 }
@@ -313,4 +316,9 @@ export async function scheduleEmailSequence({ email, name }, options = {}) {
   return await sendFirstEmail({ email, name });
 }
 
-export default { sendMail, scheduleEmailSequence, sendFirstEmail, scheduleRemainingEmails };
+export default {
+  sendMail,
+  scheduleEmailSequence,
+  sendFirstEmail,
+  scheduleRemainingEmails,
+};

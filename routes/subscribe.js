@@ -1,6 +1,9 @@
 import express from "express";
 import { db, collections } from "../config/firebase.js";
-import { scheduleEmailSequence, scheduleRemainingEmails } from "../services/emailService.js";
+import {
+  scheduleEmailSequence,
+  scheduleRemainingEmails,
+} from "../services/emailService.js";
 import { authenticateAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -122,10 +125,10 @@ router.post("/start-automation", async (req, res) => {
       name: name || null,
     });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: "Email automation started",
-      ...result
+      ...result,
     });
   } catch (error) {
     console.error("Start automation route error:", error);
