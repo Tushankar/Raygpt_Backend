@@ -257,7 +257,7 @@ export async function scheduleRemainingEmails({ email, name }, options = {}) {
   } else {
     // For immediate testing: 2s, 4s, 6s, 8s, 10s, 12s (change this back to days for production)
     emailDelays = [2000, 4000, 6000, 8000, 10000, 12000];
-    
+
     // Production delays (uncomment when ready for production):
     // const dayInMs = 24 * 60 * 60 * 1000;
     // emailDelays = [
