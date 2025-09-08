@@ -17,7 +17,7 @@ router.post("/submit", authenticateJWT, async (req, res) => {
 
     // Debug logging
     console.log("Review submission debug:");
-    console.log("req.headers['content-type']:", req.headers['content-type']);
+    console.log("req.headers['content-type']:", req.headers["content-type"]);
     console.log("req.body:", req.body);
     console.log("req.body type:", typeof req.body);
     console.log("req.body keys:", Object.keys(req.body || {}));
