@@ -15,6 +15,13 @@ router.post("/submit", authenticateJWT, async (req, res) => {
     const userEmail = req.user?.email;
     const userName = req.user?.name || req.user?.displayName;
 
+    // Debug logging
+    console.log("Review submission debug:");
+    console.log("req.body:", req.body);
+    console.log("req.user:", req.user);
+    console.log("userId:", userId);
+    console.log("rating:", rating);
+
     if (!userId) {
       return res.status(401).json({
         success: false,
