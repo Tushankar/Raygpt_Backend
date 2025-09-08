@@ -18,6 +18,7 @@ import calendlyRoutes from "./routes/calendly.js";
 import debugRoutes from "./routes/debug.js";
 import automationRoutes from "./routes/automation.js";
 import downloadRoutes from "./routes/download.js";
+import reviewRoutes from "./routes/reviews.js";
 
 // Load environment variables
 dotenv.config();
@@ -160,6 +161,7 @@ app.use("/api/calendly", calendlyRoutes);
 app.use("/api/debug", debugRoutes);
 app.use("/api/automation", automationRoutes);
 app.use("/api/download", downloadRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
