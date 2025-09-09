@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
 
 dotenv.config();
 
@@ -52,12 +54,48 @@ function randDelay(minSec = 10, maxSec = 20) {
 // Frontend URL for absolute links in emails
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
+// Production environment check
+const isProduction = process.env.NODE_ENV === "production";
+
+console.log(`📧 Email Service initialized:`);
+console.log(`   - Frontend URL: ${FRONTEND_URL}`);
+console.log(`   - Environment: ${isProduction ? "Production" : "Development"}`);
+console.log(`   - Email configured: ${transporter ? "Yes" : "No"}`);
+console.log(`   - Working directory: ${process.cwd()}`);
+
+// Log available manual files at startup
+try {
+  const manualPaths = [
+    path.join(process.cwd(), "public", "manuals"),
+    path.join(process.cwd(), "server", "public", "manuals"),
+    path.join(process.cwd(), "client", "public", "manuals"),
+  ];
+
+  console.log(`📁 Checking for manual files in production:`);
+  manualPaths.forEach((dir) => {
+    try {
+      if (fs.existsSync(dir)) {
+        const files = fs.readdirSync(dir);
+        console.log(`   - ${dir}: ${files.join(", ")}`);
+      } else {
+        console.log(`   - ${dir}: [not found]`);
+      }
+    } catch (e) {
+      console.log(`   - ${dir}: [error: ${e.message}]`);
+    }
+  });
+} catch (e) {
+  console.warn("Could not check manual files:", e.message);
+}
+
 // The email sequence content with HTML templates (Ray's Healthy Living branded)
 const EMAIL_SEQUENCE = [
   {
     subject: "Your Vitamin Store Opportunity Manual — Here it is",
     render: (name, email) => {
-      const downloadUrl = `${FRONTEND_URL}/api/download/manual`;
+      // Use the backend URL for production (Render) since files are served from server
+      const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+      const downloadUrl = `${backendUrl}/api/download/manual`;
       const plain = `Hi ${
         name || "there"
       },\n\nThanks for signing up — your Vitamin Store Opportunity Manual is ready. Download here: ${downloadUrl}\n\nBest,\nRay's Healthy Living Team`;
@@ -168,7 +206,9 @@ const EMAIL_SEQUENCE = [
   {
     subject: "Claim Your Free Manual & Stay Connected",
     render: (name) => {
-      const downloadUrl = `${FRONTEND_URL}/api/download/manual`;
+      // Use the backend URL for production (Render) since files are served from server
+      const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+      const downloadUrl = `${backendUrl}/api/download/manual`;
       const plain = `Hi ${
         name || "there"
       },\n\nWhen you signed up, you received:\n• The full Vitamin Store Business Opportunity Manual\n• Weekly insights on health and wellness entrepreneurship\n• Exclusive invitations to webinars and info sessions\n\nManual link: ${downloadUrl}\n\nBest,\nRay's Healthy Living`;
@@ -193,26 +233,97 @@ const EMAIL_SEQUENCE = [
     },
   },
   {
-    subject: "Ready to Take the Next Step?",
+    subject: "🎁 Here's Your Final Business Manual + Next Steps",
     render: (name) => {
-      const scheduleUrl = `${FRONTEND_URL}/book-call`;
+      const scheduleUrl = `${FRONTEND_URL}/#book-consultation`;
+      // Use the backend URL for production (Render) since files are served from server
+      const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+      const finalManualUrl = `${backendUrl}/api/download/final-manual`;
       const plain = `Hi ${
         name || "there"
-      },\n\nEvery successful business starts with a single step. For you, that step is scheduling a free consultation call. On this call, we'll discuss your goals, walk you through the system, and show you how to launch your own store.\n\nBook your call: ${scheduleUrl}\n\nSpaces are limited — secure your spot today and start building your legacy with Ray's Healthy Living.\n\nBest,\nRay's Healthy Living`;
+      },\n\nHere is your final email! 🎉\n\nAs promised, I'm sending you the FINAL and most comprehensive version of our Business Opportunity Manual. This updated manual includes:\n\n• Advanced strategies not covered in the initial version\n• Real case studies from successful store owners\n• Updated market data and projections for 2024-2025\n• Step-by-step implementation timeline\n• Exclusive supplier contacts and pricing guides\n\nDownload your final manual: ${finalManualUrl}\n\nNow that you have all the information, it's time to take action. Every successful business starts with a single step. For you, that step is scheduling a free consultation call. On this call, we'll discuss your goals, walk you through the system, and show you how to launch your own store.\n\nBook your call: ${scheduleUrl}\n\nSpaces are limited — secure your spot today and start building your legacy with Ray's Healthy Living.\n\nThis is your moment. Don't let it pass.\n\nBest,\nRay's Healthy Living Team`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Ready to Take the Next Step?</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:26px;font-weight:bold">🎁 Here's Your Final Business Manual</h2>
           <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hi ${
             name || "there"
           },</p>
-          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Every successful business starts with a single step. For you, that step is scheduling a free consultation call. On this call, we'll discuss your goals, walk you through the system, and show you how to launch your own store.</p>
-          <div style="text-align:center;margin:30px 0">
-            <a href="${scheduleUrl}" style="background:#E4631F;color:#ffffff;padding:18px 30px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:18px;display:inline-block">👉 Book My Free Consultation</a>
+          <div style="background:#fff3e0;border-left:4px solid #E4631F;padding:20px;margin:20px 0;border-radius:0 8px 8px 0">
+            <p style="color:#d4620a;font-size:18px;font-weight:bold;margin:0 0 10px">🎉 Here is your final email!</p>
+            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0">As promised, I'm sending you the FINAL and most comprehensive version of our Business Opportunity Manual.</p>
           </div>
-          <p style="color:#666666;font-style:italic;font-size:16px;line-height:1.6;margin:20px 0;text-align:center;padding:15px;background:#f9f9f9;border-radius:6px">Spaces are limited — secure your spot today and start building your legacy with Ray's Healthy Living.</p>
-          <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Ray's Healthy Living</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:20px 0">This updated manual includes:</p>
+          <div style="margin: 20px 0;">
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Advanced strategies not covered in the initial version</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Real case studies from successful store owners</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Updated market data and projections for 2024-2025</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Step-by-step implementation timeline</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Exclusive supplier contacts and pricing guides</p>
+          </div>
+          <div style="text-align:center;margin:25px 0">
+            <a href="${finalManualUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;margin-bottom:15px">📥 Download Your Final Manual</a>
+          </div>
+          <div style="border-top:2px solid #E4631F;padding-top:25px;margin-top:30px">
+            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Now that you have all the information, it's time to take action. Every successful business starts with a single step. For you, that step is scheduling a free consultation call.</p>
+            <div style="text-align:center;margin:25px 0">
+              <a href="${scheduleUrl}" style="background:#28a745;color:#ffffff;padding:18px 30px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:18px;display:inline-block">� Book My Free Consultation</a>
+            </div>
+            <p style="color:#666666;font-style:italic;font-size:16px;line-height:1.6;margin:20px 0;text-align:center;padding:15px;background:#f9f9f9;border-radius:6px;border-left:4px solid #28a745"><strong>This is your moment. Don't let it pass.</strong><br>Spaces are limited — secure your spot today!</p>
+          </div>
+          <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Ray's Healthy Living Team</p>
         </div>`;
-      return { text: plain, html };
+      return {
+        text: plain,
+        html,
+        attachments: (() => {
+          // Try multiple paths for the final manual in production (server paths first for Render deployment)
+          const possiblePaths = [
+            path.join(
+              process.cwd(),
+              "public",
+              "manuals",
+              "free-business-opportunity-manual-final.pdf"
+            ),
+            path.join(
+              process.cwd(),
+              "server",
+              "public",
+              "manuals",
+              "free-business-opportunity-manual-final.pdf"
+            ),
+            path.join(
+              process.cwd(),
+              "client",
+              "public",
+              "manuals",
+              "free-business-opportunity-manual-final.pdf"
+            ),
+          ];
+
+          for (const testPath of possiblePaths) {
+            try {
+              if (fs.existsSync(testPath)) {
+                console.log(`Found final manual at: ${testPath}`);
+                return [
+                  {
+                    filename: "Ray-Healthy-Living-Final-Business-Manual.pdf",
+                    path: testPath,
+                    contentType: "application/pdf",
+                  },
+                ];
+              }
+            } catch (e) {
+              console.warn(`Could not access path: ${testPath}`, e.message);
+            }
+          }
+
+          console.warn(
+            "Final manual PDF not found for email attachment. Searched paths:",
+            possiblePaths
+          );
+          return []; // Return empty array if file not found
+        })(),
+      };
     },
   },
 ];
@@ -277,22 +388,17 @@ export async function scheduleRemainingEmails({ email, name }, options = {}) {
     setTimeout(async () => {
       try {
         const rendered = item.render(name, email);
-        // Ensure every email includes a booking link (use env fallback)
-        const bookingLink =
-          process.env.BOOKING_LINK || `${FRONTEND_URL}/book-call`;
-        const textWithLink = `${rendered.text}\n\nBook a call: ${bookingLink}`;
-        const htmlWithLink = `${rendered.html}\n<p style="margin-top:12px"><a href=\"${bookingLink}\" style=\"background:#E4631F;color:#fff;padding:10px 14px;border-radius:6px;text-decoration:none\">Book a Call</a></p>`;
 
         await sendMail({
           to: email,
           subject: item.subject,
-          text: textWithLink,
-          html: htmlWithLink,
+          text: rendered.text,
+          html: rendered.html,
+          attachments: rendered.attachments || undefined,
         });
+
         console.log(
-          `Email ${idx + 2} sent to ${email} on day ${idx + 1} (subject: ${
-            item.subject
-          })`
+          `Email ${idx + 2} sent to ${email} (subject: ${item.subject})`
         );
       } catch (err) {
         console.error(
