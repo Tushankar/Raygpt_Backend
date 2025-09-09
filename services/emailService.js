@@ -190,7 +190,7 @@ const EMAIL_SEQUENCE = [
       const plain = `Hi ${
         name || "there"
       },\n\nThe health and wellness industry is booming. Consumers are investing more than ever in supplements, natural products, and holistic health solutions. With global supplement sales projected to grow by billions in the coming years, now is the time to position yourself in this fast-growing market.\n\nRay's Healthy Living provides the platform, products, and systems to help you tap into this opportunity with confidence.\n\nBest,\nRay's Healthy Living`;
-      const html = `
+      const html = ` 
         <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
           <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Why Vitamin Stores? Why Now?</h2>
           <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hi ${
@@ -235,7 +235,7 @@ const EMAIL_SEQUENCE = [
   {
     subject: "🎁 Here's Your Final Business Manual + Next Steps",
     render: (name) => {
-      const scheduleUrl = `${FRONTEND_URL}/#book-consultation`;
+      const scheduleUrl = "https://calendly.com/sahatushankar234/30min";
       // Use the backend URL for production (Render) since files are served from server
       const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
       const finalManualUrl = `${backendUrl}/api/download/final-manual`;
