@@ -1,4 +1,5 @@
 import { db } from "../config/firebase.js";
+import https from "https";
 
 export class GoogleReviewsService {
   /**
@@ -14,8 +15,8 @@ export class GoogleReviewsService {
 
       console.log("Fetching Google reviews from:", url);
 
-      const response = await fetch(url);
-      const data = await response.json();
+      // Use a more compatible approach for older Node.js environments
+      const data = await this.makeHttpRequest(url);
 
       if (data.status !== "OK") {
         throw new Error(
@@ -183,5 +184,35 @@ export class GoogleReviewsService {
         error: "Failed to fetch reviews",
       };
     }
+  }
+
+  /**
+   * Make HTTP request compatible with older Node.js versions
+   */
+  static makeHttpRequest(url) {
+    return new Promise((resolve, reject) => {
+      https.get(url, (res) => {
+        let data = '';
+        
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        res.on('end', () => {
+          try {
+            const jsonData = JSON.parse(data);
+            resolve(jsonData);
+          } catch (error) {
+            reject(new Error(`Failed to parse JSON response: ${error.message}`));
+          }
+        });
+        
+        res.on('error', (error) => {
+          reject(error);
+        });
+      }).on('error', (error) => {
+        reject(error);
+      });
+    });
   }
 }
