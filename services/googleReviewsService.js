@@ -191,28 +191,32 @@ export class GoogleReviewsService {
    */
   static makeHttpRequest(url) {
     return new Promise((resolve, reject) => {
-      https.get(url, (res) => {
-        let data = '';
-        
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        
-        res.on('end', () => {
-          try {
-            const jsonData = JSON.parse(data);
-            resolve(jsonData);
-          } catch (error) {
-            reject(new Error(`Failed to parse JSON response: ${error.message}`));
-          }
-        });
-        
-        res.on('error', (error) => {
+      https
+        .get(url, (res) => {
+          let data = "";
+
+          res.on("data", (chunk) => {
+            data += chunk;
+          });
+
+          res.on("end", () => {
+            try {
+              const jsonData = JSON.parse(data);
+              resolve(jsonData);
+            } catch (error) {
+              reject(
+                new Error(`Failed to parse JSON response: ${error.message}`)
+              );
+            }
+          });
+
+          res.on("error", (error) => {
+            reject(error);
+          });
+        })
+        .on("error", (error) => {
           reject(error);
         });
-      }).on('error', (error) => {
-        reject(error);
-      });
     });
   }
 }
