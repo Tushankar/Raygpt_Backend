@@ -1,5 +1,6 @@
 import express from "express";
 import { ReviewService } from "../services/reviewService.js";
+import { GoogleReviewsService } from "../services/googleReviewsService.js";
 import { authenticateJWT } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -253,6 +254,84 @@ router.delete("/admin/:reviewId", authenticateJWT, async (req, res) => {
     }
   } catch (error) {
     console.error("Error deleting review:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
+
+// Google Reviews routes
+
+/**
+ * POST /api/reviews/google/fetch
+ * Fetch and store Google reviews (admin only)
+ */
+router.post("/google/fetch", authenticateJWT, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user?.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        error: "Admin access required",
+      });
+    }
+
+    const result = await GoogleReviewsService.fetchAndStoreGoogleReviews();
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    console.error("Error fetching Google reviews:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
+
+/**
+ * GET /api/reviews/google
+ * Get Google reviews from Firestore
+ */
+router.get("/google", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const result = await GoogleReviewsService.getGoogleReviews(limit);
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    console.error("Error fetching Google reviews:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
+  }
+});
+
+/**
+ * GET /api/reviews/mixed
+ * Get mixed reviews (both Google and user reviews)
+ */
+router.get("/mixed", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await GoogleReviewsService.getMixedReviews(limit);
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(500).json(result);
+    }
+  } catch (error) {
+    console.error("Error fetching mixed reviews:", error);
     res.status(500).json({
       success: false,
       error: "Internal server error",
