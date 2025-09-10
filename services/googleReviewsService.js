@@ -7,7 +7,7 @@ export class GoogleReviewsService {
   static async fetchAndStoreGoogleReviews() {
     try {
       const API_KEY = "AIzaSyDnwBHYVZjvlrU2FHW5ZxTs1VFPzNxXDWE";
-      const PLACE_ID = "ChIJ5V5Yx4q5t4kRm7jPw3L4H3g";
+      const PLACE_ID = "ChIJT5HIJgB5t4kR59gQgNGScDI";
 
       // Fetch data from Google Places API
       const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=name,rating,reviews&key=${API_KEY}`;
