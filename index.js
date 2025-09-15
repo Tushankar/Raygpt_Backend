@@ -19,6 +19,7 @@ import debugRoutes from "./routes/debug.js";
 import automationRoutes from "./routes/automation.js";
 import downloadRoutes from "./routes/download.js";
 import reviewRoutes from "./routes/reviews.js";
+import translationRoutes from "./routes/translation.js";
 
 // Load environment variables
 dotenv.config();
@@ -162,6 +163,7 @@ app.use("/api/debug", debugRoutes);
 app.use("/api/automation", automationRoutes);
 app.use("/api/download", downloadRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/translate", translationRoutes);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
