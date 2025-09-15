@@ -130,6 +130,7 @@ router.post("/trigger", async (req, res) => {
         name,
         bookingLink: link,
         leadId: id,
+        language: data.language || 'en',
       })
       .catch((e) => console.error(e));
 

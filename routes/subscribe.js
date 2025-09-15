@@ -46,7 +46,7 @@ router.get("/", authenticateAdmin, async (req, res) => {
 // POST /api/subscribe - save email opt-ins for the free manual
 router.post("/", async (req, res) => {
   try {
-    const { email, name } = req.body || {};
+    const { email, name, language } = req.body || {};
 
     if (!email || typeof email !== "string") {
       return res
@@ -54,9 +54,13 @@ router.post("/", async (req, res) => {
         .json({ success: false, error: "Valid email is required" });
     }
 
+    // Validate language (default to 'en' if not provided or invalid)
+    const userLanguage = language && ['en', 'es'].includes(language) ? language : 'en';
+
     const subscription = {
       email: email.toLowerCase().trim(),
       name: name || null,
+      language: userLanguage,
       createdAt: new Date().toISOString(),
       source: "landing-page",
     };
@@ -78,6 +82,7 @@ router.post("/", async (req, res) => {
     scheduleEmailSequence({
       email: subscription.email,
       name: subscription.name,
+      language: subscription.language,
     }).catch((err) => {
       console.error("Failed to schedule email sequence:", err?.message || err);
     });
@@ -92,7 +97,7 @@ router.post("/", async (req, res) => {
 // POST /api/subscribe/start-automation - start the remaining email sequence for engagement
 router.post("/start-automation", async (req, res) => {
   try {
-    const { email, name } = req.body || {};
+    const { email, name, language } = req.body || {};
 
     if (!email || typeof email !== "string") {
       return res
@@ -112,8 +117,12 @@ router.post("/start-automation", async (req, res) => {
         .json({ success: false, error: "Email not found in subscribers" });
     }
 
-    // Update subscriber to mark automation started
+    // Get subscriber data to retrieve language preference
     const subscriberDoc = subscribersQuery.docs[0];
+    const subscriberData = subscriberDoc.data();
+    const userLanguage = language || subscriberData.language || 'en';
+
+    // Update subscriber to mark automation started
     await subscriberDoc.ref.update({
       automationStarted: true,
       automationStartedAt: new Date().toISOString(),
@@ -122,7 +131,8 @@ router.post("/start-automation", async (req, res) => {
     // Schedule the remaining email sequence (emails 2-7)
     const result = await scheduleRemainingEmails({
       email: email.toLowerCase().trim(),
-      name: name || null,
+      name: name || subscriberData.name || null,
+      language: userLanguage,
     });
 
     res.json({
@@ -153,7 +163,7 @@ router.post("/broadcast", authenticateAdmin, async (req, res) => {
         .collection("subscriptions")
         .doc(id)
         .update({ scheduled: true, lastScheduledAt: new Date().toISOString() })
-        .then(() => scheduleEmailSequence({ email, name }))
+        .then(() => scheduleEmailSequence({ email, name, language: data.language || 'en' }))
         .catch((err) => {
           console.error(
             `Failed to schedule for ${email}:`,

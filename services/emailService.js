@@ -88,6 +88,242 @@ try {
   console.warn("Could not check manual files:", e.message);
 }
 
+// Spanish email templates
+const EMAIL_SEQUENCE_ES = [
+  {
+    subject: "Tu Manual de Oportunidad de Negocio de Vitaminas — Aquí está",
+    render: (name, email) => {
+      const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+      const downloadUrl = `${backendUrl}/api/download/manual`;
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\nGracias por registrarte — tu Manual de Oportunidad de Negocio de Vitaminas está listo. Descárgalo aquí: ${downloadUrl}\n\nSaludos,\nEquipo de Ray's Healthy Living`;
+      const html = `
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Ray's Healthy Living — Tu Manual está listo</h2>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Gracias por solicitar el Manual de Oportunidad de Negocio de Vitaminas. Puedes descargarlo ahora:</p>
+          <div style="text-align:center;margin:25px 0">
+            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">📥 Descargar el Manual</a>
+          </div>
+          <p style="color:#666666;font-size:14px;line-height:1.5;margin:20px 0">Si el botón no funciona, copia y pega este enlace en tu navegador: ${downloadUrl}</p>
+          <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Equipo de Ray's Healthy Living</p>
+        </div>`;
+      return { text: plain, html };
+    },
+  },
+  {
+    subject: "¿Por qué elegir Ray's Healthy Living?",
+    render: (name) => {
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\nEn Ray's Healthy Living, hemos construido un sistema diseñado para personas reales que quieren ser dueños de un negocio de bienestar sin años de prueba y error. Nuestro marco probado hace posible que cualquier persona con pasión y determinación tenga éxito.\n\nNuestros 4 Pilares:\n• Sistema – Operaciones paso a paso sin conjeturas\n• Crecimiento – Un modelo de negocio diseñado para expandirse y escalar\n• Estrategia – Respaldado por años de experiencia en suplementos y venta al por menor\n• Legado – Construye algo que perdure para tu familia y comunidad\n\nSaludos,\nRay's Healthy Living`;
+      const html = `
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">¿Por qué elegir Ray's Healthy Living?</h2>
+          <p style="color:#f0f0f0;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <p style="color:#e0e0e0;font-size:16px;line-height:1.6;margin:0 0 25px">En Ray's Healthy Living, hemos construido un sistema diseñado para personas reales que quieren ser dueños de un negocio de bienestar sin años de prueba y error. Nuestro marco probado hace posible que cualquier persona con pasión y determinación tenga éxito.</p>
+          <div style="margin: 25px 0;">
+            <h3 style="color:#E4631F; margin-bottom: 15px;font-size:20px;font-weight:bold">Nuestros 4 Pilares:</h3>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Sistema</strong> – Operaciones paso a paso sin conjeturas.</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Crecimiento</strong> – Un modelo de negocio diseñado para expandirse y escalar.</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Estrategia</strong> – Respaldado por años de experiencia en suplementos y venta al por menor.</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Legado</strong> – Construye algo que perdure para tu familia y comunidad.</p>
+          </div>
+          <p style="margin-top:30px;color:#cccccc;font-size:16px">— Ray's Healthy Living</p>
+        </div>`;
+      return { text: plain, html };
+    },
+  },
+  {
+    subject: "De Negocio Familiar a Sistema Escalable",
+    render: (name) => {
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\nEste viaje comenzó con un sueño familiar. El fundador Rayman Khan ayudó a su madre a establecer dos tiendas de vitaminas exitosas y luego construyó su propia operación próspera. A través de esas experiencias, creó un sistema repetible y escalable que otros pueden seguir.\n\nHoy, ese sistema se ha convertido en Ray's Healthy Living — una marca que te equipa con todo lo que necesitas para abrir tu propia tienda, servir a tu comunidad y construir un legado de salud.\n\nSaludos,\nRay's Healthy Living`;
+      const html = `
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">De Negocio Familiar a Sistema Escalable</h2>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Este viaje comenzó con un sueño familiar. El fundador Rayman Khan ayudó a su madre a establecer dos tiendas de vitaminas exitosas y luego construyó su propia operación próspera. A través de esas experiencias, creó un sistema repetible y escalable que otros pueden seguir.</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Hoy, ese sistema se ha convertido en Ray's Healthy Living — una marca que te equipa con todo lo que necesitas para abrir tu propia tienda, servir a tu comunidad y construir un legado de salud.</p>
+          <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Ray's Healthy Living</p>
+        </div>`;
+      return { text: plain, html };
+    },
+  },
+  {
+    subject: "Esto es lo que recibes",
+    render: (name) => {
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\nEsto es lo que recibes con Ray's Healthy Living:\n\n• Manual de Oportunidad – Tu plan paso a paso para comenzar\n• Línea de Productos Probada – Acceso a más de 1,000 productos de bienestar\n• Sistemas de Configuración de Tienda – Orientación sobre diseño, inventario y operaciones\n• Entrenamiento y Mentoría – Aprende directamente de quienes lo han hecho\n• Comunidad y Apoyo – Únete a una red de dueños de tiendas y visionarios\n\nNo necesitas experiencia previa en negocios — solo pasión y el sistema correcto. Nosotros nos encargamos del marco. Tú aportas la determinación.\n\nSaludos,\nRay's Healthy Living`;
+      const html = `
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Esto es lo que recibes</h2>
+          <p style="color:#f0f0f0;font-size:16px;line-height:1.6;margin:0 0 25px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <div style="margin: 25px 0;">
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Manual de Oportunidad</strong> – Tu plan paso a paso para comenzar.</p>
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Línea de Productos Probada</strong> – Acceso a más de 1,000 productos de bienestar.</p>
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Sistemas de Configuración de Tienda</strong> – Orientación sobre diseño, inventario y operaciones.</p>
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Entrenamiento y Mentoría</strong> – Aprende directamente de quienes lo han hecho.</p>
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Comunidad y Apoyo</strong> – Únete a una red de dueños de tiendas y visionarios.</p>
+          </div>
+          <p style="color:#e0e0e0;font-style:italic;font-size:16px;line-height:1.6;margin:20px 0;padding:15px;background:rgba(228,99,31,0.1);border-left:3px solid #E4631F">No necesitas experiencia previa en negocios — solo pasión y el sistema correcto. Nosotros nos encargamos del marco. Tú aportas la determinación.</p>
+          <p style="color:#cccccc;font-size:16px;margin-top:30px">— Ray's Healthy Living</p>
+        </div>`;
+      return { text: plain, html };
+    },
+  },
+  {
+    subject: "¿Por qué Tiendas de Vitaminas? ¿Por qué ahora?",
+    render: (name) => {
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\nLa industria de la salud y el bienestar está en auge. Los consumidores están invirtiendo más que nunca en suplementos, productos naturales y soluciones de salud holística. Con las ventas globales de suplementos proyectadas a crecer por miles de millones en los próximos años, ahora es el momento de posicionarte en este mercado de rápido crecimiento.\n\nRay's Healthy Living proporciona la plataforma, productos y sistemas para ayudarte a aprovechar esta oportunidad con confianza.\n\nSaludos,\nRay's Healthy Living`;
+      const html = ` 
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">¿Por qué Tiendas de Vitaminas? ¿Por qué ahora?</h2>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">La industria de la salud y el bienestar está en auge. Los consumidores están invirtiendo más que nunca en suplementos, productos naturales y soluciones de salud holística. Con las ventas globales de suplementos proyectadas a crecer por miles de millones en los próximos años, ahora es el momento de posicionarte en este mercado de rápido crecimiento.</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Ray's Healthy Living proporciona la plataforma, productos y sistemas para ayudarte a aprovechar esta oportunidad con confianza.</p>
+          <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Ray's Healthy Living</p>
+        </div>`;
+      return { text: plain, html };
+    },
+  },
+  {
+    subject: "Reclama tu Manual Gratuito y Mantente Conectado",
+    render: (name) => {
+      const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+      const downloadUrl = `${backendUrl}/api/download/manual`;
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\nCuando te registraste, recibiste:\n• El Manual completo de Oportunidad de Negocio de Tienda de Vitaminas\n• Perspectivas semanales sobre emprendimiento en salud y bienestar\n• Invitaciones exclusivas a seminarios web y sesiones informativas\n\nEnlace del manual: ${downloadUrl}\n\nSaludos,\nRay's Healthy Living`;
+      const html = `
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Reclama tu Manual Gratuito y Mantente Conectado</h2>
+          <p style="color:#f0f0f0;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <p style="color:#e0e0e0;font-size:16px;line-height:1.6;margin:0 0 20px">Cuando te registraste, recibiste:</p>
+          <div style="margin: 20px 0;">
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> El Manual completo de Oportunidad de Negocio de Tienda de Vitaminas</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Perspectivas semanales sobre emprendimiento en salud y bienestar</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Invitaciones exclusivas a seminarios web y sesiones informativas</p>
+          </div>
+          <div style="text-align:center;margin:25px 0">
+            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">👉 Sí, Envíame el Manual</a>
+          </div>
+          <p style="color:#cccccc;font-size:16px;margin-top:30px">— Ray's Healthy Living</p>
+        </div>`;
+      return { text: plain, html };
+    },
+  },
+  {
+    subject: "🎁 Aquí está tu Manual de Negocio Final + Próximos Pasos",
+    render: (name) => {
+      const scheduleUrl = "https://calendly.com/sahatushankar234/30min";
+      const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+      const finalManualUrl = `${backendUrl}/api/download/final-manual`;
+      const plain = `Hola ${
+        name || "amigo/a"
+      },\n\n¡Aquí está tu correo final! 🎉\n\nComo prometí, te envío la versión FINAL y más completa de nuestro Manual de Oportunidad de Negocio. Este manual actualizado incluye:\n\n• Estrategias avanzadas no cubiertas en la versión inicial\n• Estudios de casos reales de dueños de tiendas exitosos\n• Datos de mercado actualizados y proyecciones para 2024-2025\n• Cronograma de implementación paso a paso\n• Contactos exclusivos de proveedores y guías de precios\n\nDescarga tu manual final: ${finalManualUrl}\n\nAhora que tienes toda la información, es hora de tomar acción. Cada negocio exitoso comienza con un solo paso. Para ti, ese paso es programar una llamada de consulta gratuita. En esta llamada, discutiremos tus objetivos, te guiaremos a través del sistema y te mostraremos cómo lanzar tu propia tienda.\n\nReserva tu llamada: ${scheduleUrl}\n\nLos espacios son limitados — asegura tu lugar hoy y comienza a construir tu legado con Ray's Healthy Living.\n\nEste es tu momento. No lo dejes pasar.\n\nSaludos,\nEquipo de Ray's Healthy Living`;
+      const html = `
+        <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:26px;font-weight:bold">🎁 Aquí está tu Manual de Negocio Final</h2>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
+            name || "amigo/a"
+          },</p>
+          <div style="background:#fff3e0;border-left:4px solid #E4631F;padding:20px;margin:20px 0;border-radius:0 8px 8px 0">
+            <p style="color:#d4620a;font-size:18px;font-weight:bold;margin:0 0 10px">🎉 ¡Aquí está tu correo final!</p>
+            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0">Como prometí, te envío la versión FINAL y más completa de nuestro Manual de Oportunidad de Negocio.</p>
+          </div>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:20px 0">Este manual actualizado incluye:</p>
+          <div style="margin: 20px 0;">
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Estrategias avanzadas no cubiertas en la versión inicial</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Estudios de casos reales de dueños de tiendas exitosos</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Datos de mercado actualizados y proyecciones para 2024-2025</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Cronograma de implementación paso a paso</p>
+            <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Contactos exclusivos de proveedores y guías de precios</p>
+          </div>
+          <div style="text-align:center;margin:25px 0">
+            <a href="${finalManualUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;margin-bottom:15px">📥 Descarga tu Manual Final</a>
+          </div>
+          <div style="border-top:2px solid #E4631F;padding-top:25px;margin-top:30px">
+            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Ahora que tienes toda la información, es hora de tomar acción. Cada negocio exitoso comienza con un solo paso. Para ti, ese paso es programar una llamada de consulta gratuita.</p>
+            <div style="text-align:center;margin:25px 0">
+              <a href="${scheduleUrl}" style="background:#28a745;color:#ffffff;padding:18px 30px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:18px;display:inline-block">📞 Reservar Mi Consulta Gratuita</a>
+            </div>
+            <p style="color:#666666;font-style:italic;font-size:16px;line-height:1.6;margin:20px 0;text-align:center;padding:15px;background:#f9f9f9;border-radius:6px;border-left:4px solid #28a745"><strong>Este es tu momento. No lo dejes pasar.</strong><br>Los espacios son limitados — ¡asegura tu lugar hoy!</p>
+          </div>
+          <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Equipo de Ray's Healthy Living</p>
+        </div>`;
+      return {
+        text: plain,
+        html,
+        attachments: (() => {
+          const possiblePaths = [
+            path.join(
+              process.cwd(),
+              "public",
+              "manuals",
+              "free-business-opportunity-manual-final.pdf"
+            ),
+            path.join(
+              process.cwd(),
+              "server",
+              "public",
+              "manuals",
+              "free-business-opportunity-manual-final.pdf"
+            ),
+            path.join(
+              process.cwd(),
+              "client",
+              "public",
+              "manuals",
+              "free-business-opportunity-manual-final.pdf"
+            ),
+          ];
+
+          for (const testPath of possiblePaths) {
+            try {
+              if (fs.existsSync(testPath)) {
+                console.log(`Found final manual at: ${testPath}`);
+                return [
+                  {
+                    filename: "Ray-Healthy-Living-Manual-Final-Negocio.pdf",
+                    path: testPath,
+                    contentType: "application/pdf",
+                  },
+                ];
+              }
+            } catch (e) {
+              console.warn(`Could not access path: ${testPath}`, e.message);
+            }
+          }
+
+          console.warn(
+            "Final manual PDF not found for email attachment. Searched paths:",
+            possiblePaths
+          );
+          return [];
+        })(),
+      };
+    },
+  },
+];
+
 // The email sequence content with HTML templates (Ray's Healthy Living branded)
 const EMAIL_SEQUENCE = [
   {
@@ -329,9 +565,10 @@ const EMAIL_SEQUENCE = [
 ];
 
 // Send only the first email (manual with download) immediately
-export async function sendFirstEmail({ email, name }) {
+export async function sendFirstEmail({ email, name, language = 'en' }) {
   try {
-    const firstEmail = EMAIL_SEQUENCE[0];
+    const emailSequence = language === 'es' ? EMAIL_SEQUENCE_ES : EMAIL_SEQUENCE;
+    const firstEmail = emailSequence[0];
     const rendered = firstEmail.render(name, email);
 
     await sendMail({
@@ -341,7 +578,7 @@ export async function sendFirstEmail({ email, name }) {
       html: rendered.html,
     });
 
-    console.log(`First email (manual) sent to ${email}`);
+    console.log(`First email (manual) sent to ${email} in ${language}`);
     return { success: true, emailSent: firstEmail.subject };
   } catch (err) {
     console.error(
@@ -353,12 +590,13 @@ export async function sendFirstEmail({ email, name }) {
 }
 
 // Schedule the remaining email sequence (emails 2-7) after user engagement
-export async function scheduleRemainingEmails({ email, name }, options = {}) {
+export async function scheduleRemainingEmails({ email, name, language = 'en' }, options = {}) {
   // For testing, use options.testMode = true to send every 30 seconds
   const isTestMode = options.testMode || false;
 
   // Skip the first email (index 0) and schedule the remaining emails
-  const remainingEmails = EMAIL_SEQUENCE.slice(1);
+  const emailSequence = language === 'es' ? EMAIL_SEQUENCE_ES : EMAIL_SEQUENCE;
+  const remainingEmails = emailSequence.slice(1);
 
   // Email timing: For testing, send emails quickly with short delays
   let emailDelays;
@@ -398,7 +636,7 @@ export async function scheduleRemainingEmails({ email, name }, options = {}) {
         });
 
         console.log(
-          `Email ${idx + 2} sent to ${email} (subject: ${item.subject})`
+          `Email ${idx + 2} sent to ${email} in ${language} (subject: ${item.subject})`
         );
       } catch (err) {
         console.error(
@@ -421,8 +659,8 @@ export async function scheduleRemainingEmails({ email, name }, options = {}) {
 }
 
 // Legacy function - now only sends first email
-export async function scheduleEmailSequence({ email, name }, options = {}) {
-  return await sendFirstEmail({ email, name });
+export async function scheduleEmailSequence({ email, name, language = 'en' }, options = {}) {
+  return await sendFirstEmail({ email, name, language });
 }
 
 export default {

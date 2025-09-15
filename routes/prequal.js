@@ -27,6 +27,7 @@ router.post("/", async (req, res) => {
       commitment,
       seriousness,
       source,
+      language,
     } = body;
 
     // Basic validation
@@ -65,6 +66,7 @@ router.post("/", async (req, res) => {
         typeof seriousness === "number"
           ? seriousness
           : parseInt(seriousness) || null,
+      language: language && ['en', 'es'].includes(language) ? language : 'en',
       crmTags: ["Pre-Qualified"],
       source: source || "landing-page",
       appointmentBooked: false,

@@ -22,6 +22,7 @@ export class UserService {
         phone: userData.phone || "",
         businessName: userData.businessName || "",
         industry: userData.industry || "",
+        language: userData.language && ['en', 'es'].includes(userData.language) ? userData.language : 'en',
         joinDate: userData.joinDate || new Date().toISOString().split("T")[0],
         kycSubmitted: userData.kycSubmitted || null,
         lastActive:
