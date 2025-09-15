@@ -183,16 +183,6 @@ router.get("/languages", (req, res) => {
   const supportedLanguages = {
     en: "English",
     es: "Español",
-    hi: "हिन्दी",
-    fr: "Français",
-    de: "Deutsch",
-    it: "Italiano",
-    pt: "Português",
-    ru: "Русский",
-    ja: "日本語",
-    ko: "한국어",
-    zh: "中文",
-    ar: "العربية",
   };
 
   res.json({
