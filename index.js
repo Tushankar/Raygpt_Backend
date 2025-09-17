@@ -81,7 +81,7 @@ app.use(
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
-        "https://deluxe-melomakarona-d6559e.netlify.app",
+        "https://rayonesystem.netlify.app",
         process.env.FRONTEND_URL,
       ].filter(Boolean);
 
