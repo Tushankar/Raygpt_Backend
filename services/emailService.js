@@ -461,7 +461,7 @@ const EMAIL_SEQUENCE = [
             <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Exclusive invitations to webinars and info sessions</p>
           </div>
           <div style="text-align:center;margin:25px 0">
-            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">👉 Yes, Send Me the Manual</a>
+          
           </div>
           <p style="color:#cccccc;font-size:16px;margin-top:30px">— Ray's Healthy Living</p>
         </div>`;
