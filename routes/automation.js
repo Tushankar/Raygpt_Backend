@@ -98,13 +98,13 @@ router.post("/trigger", async (req, res) => {
     // Create a simple 30-minute calendar invite starting 24 hours from now
     const start = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const end = new Date(start.getTime() + 30 * 60 * 1000);
-    const uid = `raygpt-${id}@raygpt.local`;
+    const uid = `rayOne-${id}@rayOne.local`;
     const dtstamp =
       new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     const dtstart =
       start.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     const dtend = end.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-    const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//raygpt//EN\nMETHOD:REQUEST\nBEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nDTSTART:${dtstart}\nDTEND:${dtend}\nSUMMARY:RayGPT Intro Call\nDESCRIPTION:Auto-scheduled optional intro call. If you'd like to keep it, please open the booking link: ${link}\nLOCATION:Zoom or Phone\nEND:VEVENT\nEND:VCALENDAR`;
+    const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//rayOne//EN\nMETHOD:REQUEST\nBEGIN:VEVENT\nUID:${uid}\nDTSTAMP:${dtstamp}\nDTSTART:${dtstart}\nDTEND:${dtend}\nSUMMARY:rayOne Intro Call\nDESCRIPTION:Auto-scheduled optional intro call. If you'd like to keep it, please open the booking link: ${link}\nLOCATION:Zoom or Phone\nEND:VEVENT\nEND:VCALENDAR`;
 
     // Fire-and-forget sending + scheduling
     emailService
@@ -115,7 +115,7 @@ router.post("/trigger", async (req, res) => {
         text: rendered.text,
         attachments: [
           {
-            filename: "raygpt-invite.ics",
+            filename: "rayOne-invite.ics",
             content: ics,
             contentType: "text/calendar; charset=UTF-8; method=REQUEST",
           },
@@ -130,7 +130,7 @@ router.post("/trigger", async (req, res) => {
         name,
         bookingLink: link,
         leadId: id,
-        language: data.language || 'en',
+        language: data.language || "en",
       })
       .catch((e) => console.error(e));
 

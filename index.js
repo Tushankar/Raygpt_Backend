@@ -189,7 +189,7 @@ app.get("/api/test-cors", (req, res) => {
 // Root endpoint
 app.get("/", (req, res) => {
   res.json({
-    message: "RayGPT API Server",
+    message: "rayOne API Server",
     version: "1.0.0",
     endpoints: ["/api/users", "/api/business-manual", "/api/kyc", "/health"],
   });
@@ -214,7 +214,7 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 RayGPT Server running on port ${PORT}`);
+  console.log(`🚀 rayOne Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(
     `🔗 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`

@@ -1,6 +1,6 @@
-# RayGPT Server
+# rayOne Server
 
-Backend server for the RayGPT application with Firebase Firestore database integration.
+Backend server for the rayOne application with Firebase Firestore database integration.
 
 ## Project Structure
 
@@ -21,7 +21,7 @@ server/
 ├── .env                         # Environment variables
 ├── package.json                 # Dependencies and scripts
 ├── index.js                     # Main server file
-└── raygpt-42372-firebase-adminsdk-fbsvc-6ca0a609fc.json # Firebase service account key
+└── rayOne-42372-firebase-adminsdk-fbsvc-6ca0a609fc.json # Firebase service account key
 ```
 
 ## Database Collections
