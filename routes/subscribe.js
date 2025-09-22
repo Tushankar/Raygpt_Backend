@@ -46,7 +46,7 @@ router.get("/", authenticateAdmin, async (req, res) => {
 // POST /api/subscribe - save email opt-ins for the free manual
 router.post("/", async (req, res) => {
   try {
-    const { email, name, language } = req.body || {};
+    const { email, name, language, optInPromotionalEmails } = req.body || {};
 
     if (!email || typeof email !== "string") {
       return res
@@ -55,12 +55,15 @@ router.post("/", async (req, res) => {
     }
 
     // Validate language (default to 'en' if not provided or invalid)
-    const userLanguage = language && ['en', 'es'].includes(language) ? language : 'en';
+    const userLanguage =
+      language && ["en", "es"].includes(language) ? language : "en";
 
     const subscription = {
       email: email.toLowerCase().trim(),
       name: name || null,
       language: userLanguage,
+      optInPromotionalEmails: !!optInPromotionalEmails,
+      unsubscribed: false,
       createdAt: new Date().toISOString(),
       source: "landing-page",
     };
@@ -78,19 +81,100 @@ router.post("/", async (req, res) => {
       console.warn("Could not mark subscription scheduled:", e?.message || e);
     }
 
-    // Schedule the email sequence (10-20s gaps by default)
-    scheduleEmailSequence({
-      email: subscription.email,
-      name: subscription.name,
-      language: subscription.language,
-    }).catch((err) => {
-      console.error("Failed to schedule email sequence:", err?.message || err);
-    });
+    // Schedule the email sequence only if user opted in and not unsubscribed
+    if (subscription.optInPromotionalEmails && !subscription.unsubscribed) {
+      scheduleEmailSequence({
+        email: subscription.email,
+        name: subscription.name,
+        language: subscription.language,
+      }).catch((err) => {
+        console.error(
+          "Failed to schedule email sequence:",
+          err?.message || err
+        );
+      });
+    } else {
+      console.log(
+        `Subscription created for ${subscription.email} but not scheduling emails (opt-in: ${subscription.optInPromotionalEmails})`
+      );
+    }
 
     res.status(201).json({ success: true, id: docRef.id });
   } catch (error) {
     console.error("Subscribe route error:", error);
     res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
+// GET /api/subscribe/unsubscribe?email=... - public link to unsubscribe (returns HTML confirmation)
+router.get("/unsubscribe", async (req, res) => {
+  try {
+    const email = (req.query.email || "").toString().toLowerCase().trim();
+    if (!email) {
+      return res.status(400).send("<h3>Invalid unsubscribe request</h3>");
+    }
+
+    const snapshot = await db
+      .collection("subscriptions")
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+
+    if (snapshot.empty) {
+      return res.status(404).send("<h3>Email not found</h3>");
+    }
+
+    const doc = snapshot.docs[0];
+    await doc.ref.update({
+      unsubscribed: true,
+      unsubscribedAt: new Date().toISOString(),
+    });
+
+    // Simple HTML confirmation page
+    return res.send(`
+      <html><head><title>Unsubscribed</title></head><body style="font-family:Arial,Helvetica,sans-serif;padding:30px;">
+        <h2>You've been unsubscribed</h2>
+        <p>The email <strong>${email}</strong> has been unsubscribed from further communications.</p>
+        <p>If this was a mistake, please contact support.</p>
+      </body></html>
+    `);
+  } catch (err) {
+    console.error("Unsubscribe GET error:", err);
+    return res.status(500).send("<h3>Server error</h3>");
+  }
+});
+
+// POST /api/subscribe/unsubscribe - public API to unsubscribe programmatically (JSON)
+router.post("/unsubscribe", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const addr =
+      email && typeof email === "string" ? email.toLowerCase().trim() : null;
+    if (!addr)
+      return res
+        .status(400)
+        .json({ success: false, error: "Valid email required" });
+
+    const snapshot = await db
+      .collection("subscriptions")
+      .where("email", "==", addr)
+      .limit(1)
+      .get();
+    if (snapshot.empty)
+      return res.status(404).json({ success: false, error: "Email not found" });
+
+    const doc = snapshot.docs[0];
+    await doc.ref.update({
+      unsubscribed: true,
+      unsubscribedAt: new Date().toISOString(),
+    });
+
+    return res.json({ success: true, message: "Unsubscribed" });
+  } catch (err) {
+    console.error("Unsubscribe POST error:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
   }
 });
 
@@ -120,7 +204,22 @@ router.post("/start-automation", async (req, res) => {
     // Get subscriber data to retrieve language preference
     const subscriberDoc = subscribersQuery.docs[0];
     const subscriberData = subscriberDoc.data();
-    const userLanguage = language || subscriberData.language || 'en';
+
+    // Respect unsubscribe and opt-in flags
+    if (subscriberData.unsubscribed) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Subscriber has unsubscribed" });
+    }
+    if (!subscriberData.optInPromotionalEmails) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "Subscriber did not opt into promotional emails",
+        });
+    }
+    const userLanguage = language || subscriberData.language || "en";
 
     // Update subscriber to mark automation started
     await subscriberDoc.ref.update({
@@ -154,6 +253,8 @@ router.post("/broadcast", authenticateAdmin, async (req, res) => {
     snapshot.forEach((doc) => {
       const data = doc.data();
       if (!data || data.scheduled) return; // skip already scheduled
+      if (data.unsubscribed) return; // skip unsubscribed
+      if (!data.optInPromotionalEmails) return; // skip those who didn't opt in
       const id = doc.id;
       const email = data.email;
       const name = data.name || null;
@@ -163,7 +264,13 @@ router.post("/broadcast", authenticateAdmin, async (req, res) => {
         .collection("subscriptions")
         .doc(id)
         .update({ scheduled: true, lastScheduledAt: new Date().toISOString() })
-        .then(() => scheduleEmailSequence({ email, name, language: data.language || 'en' }))
+        .then(() =>
+          scheduleEmailSequence({
+            email,
+            name,
+            language: data.language || "en",
+          })
+        )
         .catch((err) => {
           console.error(
             `Failed to schedule for ${email}:`,

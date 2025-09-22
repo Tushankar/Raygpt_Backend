@@ -31,12 +31,33 @@ function sendMail({ to, subject, text, html, attachments }) {
   }
 
   const from = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+
+  // Append unsubscribe footer to text and html
+  const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
+  const unsubscribeUrl = `${backendUrl.replace(
+    /\/$/,
+    ""
+  )}/api/subscribe/unsubscribe?email=${encodeURIComponent(
+    (to || "").toString().toLowerCase().trim()
+  )}`;
+
+  const footerText = `\n\nTo unsubscribe, click here: ${unsubscribeUrl}`;
+  const footerHtml = `
+    <div style="margin-top:36px;border-top:1px solid #e6e6e6;padding-top:12px;font-size:12px;color:#888">
+      <p style="margin:0">If you no longer wish to receive these emails, <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
+    </div>
+  `;
+
+  const finalText =
+    (text || (html ? html.replace(/<[^>]+>/g, "") : "") || "") + footerText;
+  const finalHtml = (html || "") + footerHtml;
+
   const mail = {
     from,
     to,
     subject,
-    text: text || (html ? html.replace(/<[^>]+>/g, "") : "") || "",
-    html: html || undefined,
+    text: finalText,
+    html: finalHtml || undefined,
     attachments: attachments || undefined,
   };
 
@@ -565,9 +586,10 @@ const EMAIL_SEQUENCE = [
 ];
 
 // Send only the first email (manual with download) immediately
-export async function sendFirstEmail({ email, name, language = 'en' }) {
+export async function sendFirstEmail({ email, name, language = "en" }) {
   try {
-    const emailSequence = language === 'es' ? EMAIL_SEQUENCE_ES : EMAIL_SEQUENCE;
+    const emailSequence =
+      language === "es" ? EMAIL_SEQUENCE_ES : EMAIL_SEQUENCE;
     const firstEmail = emailSequence[0];
     const rendered = firstEmail.render(name, email);
 
@@ -590,12 +612,15 @@ export async function sendFirstEmail({ email, name, language = 'en' }) {
 }
 
 // Schedule the remaining email sequence (emails 2-7) after user engagement
-export async function scheduleRemainingEmails({ email, name, language = 'en' }, options = {}) {
+export async function scheduleRemainingEmails(
+  { email, name, language = "en" },
+  options = {}
+) {
   // For testing, use options.testMode = true to send every 30 seconds
   const isTestMode = options.testMode || false;
 
   // Skip the first email (index 0) and schedule the remaining emails
-  const emailSequence = language === 'es' ? EMAIL_SEQUENCE_ES : EMAIL_SEQUENCE;
+  const emailSequence = language === "es" ? EMAIL_SEQUENCE_ES : EMAIL_SEQUENCE;
   const remainingEmails = emailSequence.slice(1);
 
   // Email timing: For testing, send emails quickly with short delays
@@ -636,7 +661,9 @@ export async function scheduleRemainingEmails({ email, name, language = 'en' }, 
         });
 
         console.log(
-          `Email ${idx + 2} sent to ${email} in ${language} (subject: ${item.subject})`
+          `Email ${idx + 2} sent to ${email} in ${language} (subject: ${
+            item.subject
+          })`
         );
       } catch (err) {
         console.error(
@@ -659,7 +686,10 @@ export async function scheduleRemainingEmails({ email, name, language = 'en' }, 
 }
 
 // Legacy function - now only sends first email
-export async function scheduleEmailSequence({ email, name, language = 'en' }, options = {}) {
+export async function scheduleEmailSequence(
+  { email, name, language = "en" },
+  options = {}
+) {
   return await sendFirstEmail({ email, name, language });
 }
 
