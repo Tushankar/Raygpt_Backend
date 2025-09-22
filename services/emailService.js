@@ -41,10 +41,14 @@ function sendMail({ to, subject, text, html, attachments }) {
     (to || "").toString().toLowerCase().trim()
   )}`;
 
-  const footerText = `\n\nTo unsubscribe, click here: ${unsubscribeUrl}`;
+  const receivingReason =
+    "You are receiving this email because you opted in at our website or signed up through a Ray's Healthy Living form.";
+
+  const footerText = `\n\n${receivingReason}\n\nTo unsubscribe, click here: ${unsubscribeUrl}`;
   const footerHtml = `
     <div style="margin-top:36px;border-top:1px solid #e6e6e6;padding-top:12px;font-size:12px;color:#888">
-      <p style="margin:0">If you no longer wish to receive these emails, <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
+      <p style="margin:0">${receivingReason}</p>
+      <p style="margin:6px 0 0">If you no longer wish to receive these emails, <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
     </div>
   `;
 
