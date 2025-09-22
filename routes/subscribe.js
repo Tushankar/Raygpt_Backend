@@ -181,7 +181,7 @@ router.post("/unsubscribe", async (req, res) => {
 // POST /api/subscribe/start-automation - start the remaining email sequence for engagement
 router.post("/start-automation", async (req, res) => {
   try {
-    const { email, name, language } = req.body || {};
+    const { email, name, language, setOptIn } = req.body || {};
 
     if (!email || typeof email !== "string") {
       return res
@@ -205,19 +205,28 @@ router.post("/start-automation", async (req, res) => {
     const subscriberDoc = subscribersQuery.docs[0];
     const subscriberData = subscriberDoc.data();
 
-    // Respect unsubscribe and opt-in flags
+    // Respect unsubscribe flag
     if (subscriberData.unsubscribed) {
       return res
         .status(400)
         .json({ success: false, error: "Subscriber has unsubscribed" });
     }
+
+    // If caller requested to set opt-in consent now (pre-consent), update the subscriber
+    if (setOptIn) {
+      try {
+        await subscriberDoc.ref.update({ optInPromotionalEmails: true });
+        subscriberData.optInPromotionalEmails = true;
+      } catch (e) {
+        console.warn("Could not set optInPromotionalEmails on subscriber:", e?.message || e);
+      }
+    }
+
+    // If still not opted in, don't proceed
     if (!subscriberData.optInPromotionalEmails) {
       return res
         .status(400)
-        .json({
-          success: false,
-          error: "Subscriber did not opt into promotional emails",
-        });
+        .json({ success: false, error: "Subscriber did not opt into promotional emails" });
     }
     const userLanguage = language || subscriberData.language || "en";
 
