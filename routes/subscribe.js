@@ -178,6 +178,41 @@ router.post("/unsubscribe", async (req, res) => {
   }
 });
 
+// POST /api/subscribe/resubscribe - public API to re-subscribe a previously unsubscribed email
+router.post("/resubscribe", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    const addr =
+      email && typeof email === "string" ? email.toLowerCase().trim() : null;
+    if (!addr)
+      return res
+        .status(400)
+        .json({ success: false, error: "Valid email required" });
+
+    const snapshot = await db
+      .collection("subscriptions")
+      .where("email", "==", addr)
+      .limit(1)
+      .get();
+    if (snapshot.empty)
+      return res.status(404).json({ success: false, error: "Email not found" });
+
+    const doc = snapshot.docs[0];
+    await doc.ref.update({
+      unsubscribed: false,
+      optInPromotionalEmails: true,
+      resubscribedAt: new Date().toISOString(),
+    });
+
+    return res.json({ success: true, message: "Resubscribed" });
+  } catch (err) {
+    console.error("Resubscribe POST error:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
+});
+
 // POST /api/subscribe/start-automation - start the remaining email sequence for engagement
 router.post("/start-automation", async (req, res) => {
   try {
@@ -218,15 +253,19 @@ router.post("/start-automation", async (req, res) => {
         await subscriberDoc.ref.update({ optInPromotionalEmails: true });
         subscriberData.optInPromotionalEmails = true;
       } catch (e) {
-        console.warn("Could not set optInPromotionalEmails on subscriber:", e?.message || e);
+        console.warn(
+          "Could not set optInPromotionalEmails on subscriber:",
+          e?.message || e
+        );
       }
     }
 
     // If still not opted in, don't proceed
     if (!subscriberData.optInPromotionalEmails) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Subscriber did not opt into promotional emails" });
+      return res.status(400).json({
+        success: false,
+        error: "Subscriber did not opt into promotional emails",
+      });
     }
     const userLanguage = language || subscriberData.language || "en";
 
