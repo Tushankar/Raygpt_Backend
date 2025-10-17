@@ -10,7 +10,9 @@ console.log("====================================\n");
 const TEST_EMAIL = "sahatushankar234@gmail.com";
 const TEST_NAME = "Tushankar Saha";
 
-console.log("This test simulates what happens when someone subscribes on the landing page.");
+console.log(
+  "This test simulates what happens when someone subscribes on the landing page."
+);
 console.log("It will send the welcome email with the manual download link.\n");
 
 console.log("Sending email to:", TEST_EMAIL);
@@ -36,12 +38,13 @@ try {
   console.log("\nThe email contains:");
   console.log("• Welcome message");
   console.log("• Download button for the business manual");
-  console.log("• Link to: https://raygpt-backend-2.onrender.com/api/download/manual");
+  console.log(
+    "• Link to: https://raygpt-backend-2.onrender.com/api/download/manual"
+  );
   console.log("\nIf you don't see it:");
   console.log("1. ✅ Check SPAM/JUNK folder (most likely location)");
   console.log("2. Check Promotions tab (if Gmail)");
   console.log("3. Search for: from:tirtho.kyptronix@gmail.com");
-
 } catch (error) {
   console.error("❌ FAILED TO SEND EMAIL");
   console.error("Error:", error.message);

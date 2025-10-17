@@ -60,7 +60,9 @@ async function testSubscribe() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Test 2: Without opt-in
-    console.log("\nTest 2: Subscribe WITHOUT opt-in (optInPromotionalEmails: false)");
+    console.log(
+      "\nTest 2: Subscribe WITHOUT opt-in (optInPromotionalEmails: false)"
+    );
     console.log("Expected: Email should STILL be sent (manual download)\n");
 
     console.log("Sending test request without opt-in...");
@@ -95,12 +97,13 @@ async function testSubscribe() {
     console.log("====================================\n");
 
     console.log("Check your email at:", testEmail);
-    console.log("You should have received a welcome email with the manual download link.");
+    console.log(
+      "You should have received a welcome email with the manual download link."
+    );
     console.log("\nIf you don't see it:");
     console.log("1. Check spam/junk folder");
     console.log("2. Search for: from:tirtho.kyptronix@gmail.com");
     console.log("3. Check the server logs above for any errors");
-
   } catch (error) {
     console.error("\n❌ Test failed:");
     console.error("Error:", error.message);
