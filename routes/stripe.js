@@ -44,11 +44,14 @@ router.post("/create-session", async (req, res) => {
       ],
       mode: "payment",
       success_url:
-        (successUrl || process.env.FRONTEND_URL || "http://localhost:5173") +
+        (successUrl ||
+          process.env.FRONTEND_URL ||
+          "https://raygpt-backend-2.onrender.com") +
         `/dashboard/business-manual?purchase_success=1&purchase_id=${purchase.id}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
-        (cancelUrl || process.env.FRONTEND_URL || "http://localhost:5173") +
-        "/dashboard/kyc",
+        (cancelUrl ||
+          process.env.FRONTEND_URL ||
+          "https://raygpt-backend-2.onrender.com") + "/dashboard/kyc",
       metadata: {
         purchaseId: purchase.id,
         packageId,

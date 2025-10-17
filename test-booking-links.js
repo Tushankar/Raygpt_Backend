@@ -9,7 +9,8 @@ dotenv.config();
 console.log("🔗 Booking Link Configuration Test");
 console.log("=====================================");
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "https://raygpt-backend-2.onrender.com";
 const BOOKING_LINK = process.env.BOOKING_LINK;
 const EXPECTED_CALENDLY = "https://calendly.com/sahatushankar234/30min";
 
@@ -24,12 +25,20 @@ console.log("======================");
 // Test final email (should use direct Calendly link)
 const finalEmailBookingLink = "https://calendly.com/sahatushankar234/30min";
 console.log(`Final email link: ${finalEmailBookingLink}`);
-console.log(`✅ Final email uses direct Calendly: ${finalEmailBookingLink === EXPECTED_CALENDLY}`);
+console.log(
+  `✅ Final email uses direct Calendly: ${
+    finalEmailBookingLink === EXPECTED_CALENDLY
+  }`
+);
 
 // Test other services (should use env var or fallback)
 const otherServicesLink = BOOKING_LINK || `${FRONTEND_URL}/book-call`;
 console.log(`Other services link: ${otherServicesLink}`);
-console.log(`✅ Other services use correct link: ${otherServicesLink === EXPECTED_CALENDLY || !BOOKING_LINK}`);
+console.log(
+  `✅ Other services use correct link: ${
+    otherServicesLink === EXPECTED_CALENDLY || !BOOKING_LINK
+  }`
+);
 
 console.log("\n🏷️  Environment Variable Recommendations");
 console.log("========================================");
@@ -49,21 +58,36 @@ console.log("\n🚀 Production Deployment Checklist");
 console.log("===================================");
 
 const checks = [
-  { name: "FRONTEND_URL set", pass: !!FRONTEND_URL && FRONTEND_URL !== "http://localhost:5173" },
+  {
+    name: "FRONTEND_URL set",
+    pass:
+      !!FRONTEND_URL &&
+      FRONTEND_URL !== "https://raygpt-backend-2.onrender.com",
+  },
   { name: "BOOKING_LINK set", pass: !!BOOKING_LINK },
-  { name: "BOOKING_LINK matches Calendly", pass: BOOKING_LINK === EXPECTED_CALENDLY },
-  { name: "NODE_ENV set to production", pass: process.env.NODE_ENV === "production" },
+  {
+    name: "BOOKING_LINK matches Calendly",
+    pass: BOOKING_LINK === EXPECTED_CALENDLY,
+  },
+  {
+    name: "NODE_ENV set to production",
+    pass: process.env.NODE_ENV === "production",
+  },
   { name: "EMAIL_USER configured", pass: !!process.env.EMAIL_USER },
-  { name: "EMAIL_PASS configured", pass: !!process.env.EMAIL_PASS }
+  { name: "EMAIL_PASS configured", pass: !!process.env.EMAIL_PASS },
 ];
 
-checks.forEach(check => {
+checks.forEach((check) => {
   const status = check.pass ? "✅" : "❌";
   console.log(`${status} ${check.name}`);
 });
 
-const allPassed = checks.every(check => check.pass);
-console.log(`\n${allPassed ? "✅" : "⚠️"} Overall Status: ${allPassed ? "Ready for production" : "Needs configuration"}`);
+const allPassed = checks.every((check) => check.pass);
+console.log(
+  `\n${allPassed ? "✅" : "⚠️"} Overall Status: ${
+    allPassed ? "Ready for production" : "Needs configuration"
+  }`
+);
 
 if (!allPassed) {
   console.log("\n📝 Required Environment Variables for Production:");
@@ -78,4 +102,8 @@ if (!allPassed) {
 console.log("\n🔍 Test URLs:");
 console.log(`Direct Calendly: ${EXPECTED_CALENDLY}`);
 console.log(`Frontend booking section: ${FRONTEND_URL}/#book-consultation`);
-console.log(`Backend booking endpoint: ${process.env.BACKEND_URL || FRONTEND_URL}/book-call`);
+console.log(
+  `Backend booking endpoint: ${
+    process.env.BACKEND_URL || FRONTEND_URL
+  }/book-call`
+);

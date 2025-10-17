@@ -77,7 +77,8 @@ function randDelay(minSec = 10, maxSec = 20) {
 }
 
 // Frontend URL for absolute links in emails
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "https://raygpt-backend-2.onrender.com";
 
 // Production environment check
 const isProduction = process.env.NODE_ENV === "production";

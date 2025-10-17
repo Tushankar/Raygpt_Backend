@@ -81,22 +81,23 @@ router.post("/", async (req, res) => {
       console.warn("Could not mark subscription scheduled:", e?.message || e);
     }
 
-    // Schedule the email sequence only if user opted in and not unsubscribed
-    if (subscription.optInPromotionalEmails && !subscription.unsubscribed) {
-      scheduleEmailSequence({
+    // ALWAYS send the first email (manual download) to everyone who subscribes
+    // This ensures they get the manual they requested
+    try {
+      await scheduleEmailSequence({
         email: subscription.email,
         name: subscription.name,
         language: subscription.language,
-      }).catch((err) => {
-        console.error(
-          "Failed to schedule email sequence:",
-          err?.message || err
-        );
       });
-    } else {
       console.log(
-        `Subscription created for ${subscription.email} but not scheduling emails (opt-in: ${subscription.optInPromotionalEmails})`
+        `✅ Welcome email sent to ${subscription.email} (opt-in: ${subscription.optInPromotionalEmails})`
       );
+    } catch (err) {
+      console.error(
+        `❌ Failed to send welcome email to ${subscription.email}:`,
+        err?.message || err
+      );
+      // Don't fail the subscription if email fails
     }
 
     res.status(201).json({ success: true, id: docRef.id });

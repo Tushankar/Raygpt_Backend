@@ -51,7 +51,7 @@ router.get("/test", (req, res) =>
 router.get("/webhook-info", (req, res) => {
   const ngrokUrl = process.env.NGROK_URL || "Not configured";
   const serverUrl =
-    process.env.SERVER_URL || "https://quiet-madeleine-43597a.netlify.app";
+    process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
 
   // Use Render URL as primary since we're deployed
   const primaryUrl = serverUrl;
@@ -388,7 +388,7 @@ router.get("/oauth/callback", (req, res) => {
 // Start OAuth flow
 router.get("/oauth/start", (req, res) => {
   const serverUrl =
-    process.env.SERVER_URL || "https://quiet-madeleine-43597a.netlify.app";
+    process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
   const clientId = process.env.CALENDLY_CLIENT_ID;
 
   const authURL =

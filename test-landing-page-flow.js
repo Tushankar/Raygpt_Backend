@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const BACKEND_URL = "https://raygpt-backend-2.onrender.com";
+const BACKEND_URL = "";
 const TEST_EMAIL = "sahatushankar234@gmail.com";
 
 console.log("====================================");
@@ -20,7 +20,7 @@ console.log("5. User receives email\n");
 
 console.log("Configuration Check:");
 console.log("-------------------");
-console.log("Frontend API URL:", "https://raygpt-backend-2.onrender.com/api");
+console.log("Frontend API URL:", "/api");
 console.log("Backend URL:", BACKEND_URL);
 console.log("Test Email:", TEST_EMAIL);
 console.log();
@@ -95,9 +95,7 @@ async function testSubscriptionFlow() {
       console.log("What the email contains:");
       console.log("   • Welcome message");
       console.log("   • Download button for the business manual");
-      console.log(
-        "   • Link: https://raygpt-backend-2.onrender.com/api/download/manual"
-      );
+      console.log("   • Link: /api/download/manual");
       console.log("   • Unsubscribe footer");
       console.log();
 
