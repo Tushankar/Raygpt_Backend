@@ -4,7 +4,7 @@ dotenv.config();
 
 const CALENDLY_ACCESS_TOKEN = process.env.CALENDLY_ACCESS_TOKEN;
 const SERVER_URL =
-  process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
+  process.env.SERVER_URL || "https://quiet-madeleine-43597a.netlify.app";
 const WEBHOOK_URL = `${SERVER_URL}/api/calendly/webhook`;
 
 console.log("🚀 Updating Calendly Webhook to Render URL");

@@ -6,7 +6,7 @@
 import fetch from "node-fetch";
 
 const SERVER_URL =
-  process.env.SERVER_URL || "https://raygpt-backend-2.onrender.com";
+  process.env.SERVER_URL || "https://quiet-madeleine-43597a.netlify.app";
 
 // Test data
 const testData = {

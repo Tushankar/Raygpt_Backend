@@ -50,7 +50,7 @@ if (missingVars.length > 0) {
 // Warn if DIDIT_API_KEY is not configured - avoids silent failures during KYC flows
 if (!process.env.DIDIT_API_KEY) {
   console.warn(
-    "⚠️  DIDIT_API_KEY is not set. KYC verification requests to the DIDit API will fail. See KYC_SETUP.md for setup instructions."
+    "⚠️  DIDIT_API_KEY is not set. KYC verification requests to the DIDit API will fail. See KYC_SETUP.md for setup instructio."
   );
 } else {
   console.log("✅ DIDIT_API_KEY is configured");
