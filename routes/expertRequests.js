@@ -10,17 +10,26 @@ import { mkdirSync, existsSync } from "fs";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587, // Use TLS port, NOT 465
+  secure: false, // false for TLS, true for SSL/465
+  requireTLS: true,
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  // CRITICAL: Add timeout settings to prevent hanging in production
-  connectionTimeout: 5000, // 5 seconds to connect
-  socketTimeout: 5000, // 5 seconds for socket operations
-  // Connection pool settings for better reliability
+  // CRITICAL: Timeout settings for Render environment
+  connectionTimeout: 30000, // 30 seconds
+  socketTimeout: 30000, // 30 seconds
+  greetingTimeout: 10000,
+  // Connection pool settings
   pool: {
-    maxConnections: 5,
-    maxMessages: 100,
-    rateDelta: 20000, // milliseconds for rate limiting
-    rateLimit: 14, // max messages per rateDelta
+    maxConnections: 1, // Keep low
+    maxMessages: 10,
+    rateDelta: 24 * 60 * 60 * 1000,
+    rateLimit: 300,
+  },
+  // TLS security options
+  tls: {
+    rejectUnauthorized: false, // Required for Render
+    minVersion: "TLSv1.2",
   },
 });
 
@@ -107,11 +116,11 @@ router.patch("/:id/status", authenticateAdmin, async (req, res) => {
             await new Promise((resolve, reject) => {
               const timeoutId = setTimeout(() => {
                 const timeoutErr = new Error(
-                  `Email send timeout (30s) for ${result.data.email}. Nodemailer may be hanging due to network issues.`
+                  `Email send timeout (60s) for ${result.data.email}. Gmail SMTP may be unreachable.`
                 );
                 console.error(`⏱️ TIMEOUT: ${timeoutErr.message}`);
                 reject(timeoutErr);
-              }, 30000);
+              }, 60000); // 60 second timeout
 
               transporter.sendMail(
                 {

@@ -9,28 +9,55 @@ dotenv.config();
 // EMAIL_USER and EMAIL_PASS are set in the server environment (.env).
 let transporter = null;
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  // Use explicit host/port with TLS instead of "gmail" service
+  // This avoids Render IP blocking issues
   transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587, // Use TLS port, NOT 465 (SSL)
+    secure: false, // false for TLS, true for SSL/465
+    requireTLS: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
-    // CRITICAL: Add timeout settings to prevent hanging in production
-    connectionTimeout: 5000, // 5 seconds to connect
-    socketTimeout: 5000, // 5 seconds for socket operations
-    // Connection pool settings for better reliability
+    // CRITICAL: Timeout settings for Render environment
+    connectionTimeout: 30000, // 30 seconds to connect (Gmail can be slow)
+    socketTimeout: 30000, // 30 seconds for socket operations
+    greetingTimeout: 10000, // Time to wait for greeting
+    // Connection pool settings for reliability
     pool: {
-      maxConnections: 5,
-      maxMessages: 100,
-      rateDelta: 20000, // milliseconds for rate limiting
-      rateLimit: 14, // max messages per rateDelta
+      maxConnections: 1, // Keep low for Render (one at a time)
+      maxMessages: 10,
+      rateDelta: 24 * 60 * 60 * 1000, // 24 hour window
+      rateLimit: 300, // Gmail allows ~300 per day
+    },
+    // TLS security options for Render
+    tls: {
+      rejectUnauthorized: false, // Required for Render environment
+      minVersion: "TLSv1.2",
     },
   });
 
   // Verify transporter connection on startup
+  console.log("📧 Attempting to verify Gmail transporter...");
   transporter.verify((err, success) => {
     if (err) {
-      console.error("❌ Email transporter verification failed:", err?.message);
+      console.error("❌ Email transporter verification failed:");
+      console.error(`   Error: ${err?.message}`);
+      console.error(`   Code: ${err?.code}`);
+      if (err?.code === "ETIMEDOUT" || err?.code === "ECONNREFUSED") {
+        console.error(
+          "   💡 Gmail SMTP is unreachable from Render. Possible solutions:"
+        );
+        console.error("      1. Wait a few minutes and restart the backend");
+        console.error(
+          "      2. Check if EMAIL_PASS is a valid Gmail App Password"
+        );
+        console.error(
+          "      3. Check Gmail security alerts at https://myaccount.google.com/security"
+        );
+        console.error("      4. Verify EMAIL_USER is correct");
+      }
     } else if (success) {
       console.log("✅ Email transporter verified and ready");
     }
@@ -88,11 +115,12 @@ function sendMail({ to, subject, text, html, attachments }) {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       const timeoutErr = new Error(
-        `Email send timeout (30s) for ${to}. Nodemailer may be hanging due to network issues.`
+        `Email send timeout (60s) for ${to}. Gmail SMTP may be unreachable from this location.`
       );
       console.error(`⏱️ TIMEOUT: ${timeoutErr.message} - Subject: ${subject}`);
+      console.error("   💡 Check if Gmail is blocking Render's IP address");
       reject(timeoutErr);
-    }, 30000); // 30 second timeout
+    }, 60000); // 60 second timeout (Gmail can be slow initially)
 
     transporter.sendMail(mail, (err, info) => {
       clearTimeout(timeoutId);
@@ -100,7 +128,15 @@ function sendMail({ to, subject, text, html, attachments }) {
       if (err) {
         console.error(`❌ Email send failed for ${to}:`, err?.message || err);
         console.error(`   Subject: ${subject}`);
-        console.error(`   Error details:`, err);
+        console.error(`   Error code: ${err?.code}`);
+        if (err?.code === "ETIMEDOUT" || err?.code === "ECONNREFUSED") {
+          console.error("   💡 Connection issue with Gmail SMTP. Check:");
+          console.error("      - EMAIL_PASS must be Gmail App Password");
+          console.error(
+            "      - Check https://myaccount.google.com/security for blocks"
+          );
+          console.error("      - Wait a minute and retry");
+        }
         reject(err);
       } else {
         console.log(
