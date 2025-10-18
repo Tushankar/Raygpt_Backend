@@ -1,7 +1,7 @@
 import express from "express";
 import { ExpertService } from "../services/expertService.js";
 import { authenticateAdmin } from "../middleware/auth.js";
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
 import { getStoreRequestStatusEmail } from "../utils/emailTemplates.js";
 import multer from "multer";
@@ -9,29 +9,10 @@ import { mkdirSync, existsSync } from "fs";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587, // Use TLS port, NOT 465
-  secure: false, // false for TLS, true for SSL/465
-  requireTLS: true,
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-  // CRITICAL: Timeout settings for Render environment
-  connectionTimeout: 30000, // 30 seconds
-  socketTimeout: 30000, // 30 seconds
-  greetingTimeout: 10000,
-  // Connection pool settings
-  pool: {
-    maxConnections: 1, // Keep low
-    maxMessages: 10,
-    rateDelta: 24 * 60 * 60 * 1000,
-    rateLimit: 300,
-  },
-  // TLS security options
-  tls: {
-    rejectUnauthorized: false, // Required for Render
-    minVersion: "TLSv1.2",
-  },
-});
+// Configure SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Ensure upload directory exists
 const uploadDir = "uploads/experts";
@@ -112,41 +93,33 @@ router.patch("/:id/status", authenticateAdmin, async (req, res) => {
             clientBaseUrl
           );
           if (result.data && result.data.email) {
-            // Wrap sendMail with proper timeout handling
-            await new Promise((resolve, reject) => {
-              const timeoutId = setTimeout(() => {
-                const timeoutErr = new Error(
-                  `Email send timeout (60s) for ${result.data.email}. Gmail SMTP may be unreachable.`
-                );
-                console.error(`⏱️ TIMEOUT: ${timeoutErr.message}`);
-                reject(timeoutErr);
-              }, 60000); // 60 second timeout
-
-              transporter.sendMail(
-                {
-                  from: process.env.EMAIL_USER,
+            // Use SendGrid for sending
+            (async () => {
+              try {
+                const msg = {
                   to: result.data.email,
+                  from:
+                    process.env.SENDGRID_FROM_EMAIL ||
+                    "noreply@rayshealthyliving.com",
                   subject,
                   text,
                   html,
-                },
-                (err, info) => {
-                  clearTimeout(timeoutId);
-                  if (err) {
-                    console.error(
-                      `❌ Failed to send expert request notification to ${result.data.email}:`,
-                      err?.message || err
-                    );
-                    reject(err);
-                  } else {
-                    console.log(
-                      `✅ Expert notification email sent to ${result.data.email} (status: ${status})`
-                    );
-                    resolve(info);
-                  }
-                }
-              );
-            });
+                  replyTo:
+                    process.env.SENDGRID_FROM_EMAIL ||
+                    "noreply@rayshealthyliving.com",
+                };
+
+                await sgMail.send(msg);
+                console.log(
+                  `✅ Expert notification email sent to ${result.data.email} (status: ${status})`
+                );
+              } catch (err) {
+                console.error(
+                  `❌ Failed to send expert request notification to ${result.data.email}:`,
+                  err?.message || err
+                );
+              }
+            })();
           }
         } catch (err) {
           console.error(

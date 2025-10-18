@@ -1,82 +1,32 @@
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 
 dotenv.config();
 
-// Configure transporter using env vars. For Gmail app password, ensure
-// EMAIL_USER and EMAIL_PASS are set in the server environment (.env).
-let transporter = null;
-if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-  // Use explicit host/port with TLS instead of "gmail" service
-  // This avoids Render IP blocking issues
-  transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587, // Use TLS port, NOT 465 (SSL)
-    secure: false, // false for TLS, true for SSL/465
-    requireTLS: true,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    // CRITICAL: Timeout settings for Render environment
-    connectionTimeout: 30000, // 30 seconds to connect (Gmail can be slow)
-    socketTimeout: 30000, // 30 seconds for socket operations
-    greetingTimeout: 10000, // Time to wait for greeting
-    // Connection pool settings for reliability
-    pool: {
-      maxConnections: 1, // Keep low for Render (one at a time)
-      maxMessages: 10,
-      rateDelta: 24 * 60 * 60 * 1000, // 24 hour window
-      rateLimit: 300, // Gmail allows ~300 per day
-    },
-    // TLS security options for Render
-    tls: {
-      rejectUnauthorized: false, // Required for Render environment
-      minVersion: "TLSv1.2",
-    },
-  });
-
-  // Verify transporter connection on startup
-  console.log("📧 Attempting to verify Gmail transporter...");
-  transporter.verify((err, success) => {
-    if (err) {
-      console.error("❌ Email transporter verification failed:");
-      console.error(`   Error: ${err?.message}`);
-      console.error(`   Code: ${err?.code}`);
-      if (err?.code === "ETIMEDOUT" || err?.code === "ECONNREFUSED") {
-        console.error(
-          "   💡 Gmail SMTP is unreachable from Render. Possible solutions:"
-        );
-        console.error("      1. Wait a few minutes and restart the backend");
-        console.error(
-          "      2. Check if EMAIL_PASS is a valid Gmail App Password"
-        );
-        console.error(
-          "      3. Check Gmail security alerts at https://myaccount.google.com/security"
-        );
-        console.error("      4. Verify EMAIL_USER is correct");
-      }
-    } else if (success) {
-      console.log("✅ Email transporter verified and ready");
-    }
-  });
+// Configure SendGrid - simpler, more reliable for production
+let sgMailConfigured = false;
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  sgMailConfigured = true;
+  console.log("✅ SendGrid email service initialized");
 } else {
   console.warn(
-    "⚠️ EMAIL_USER or EMAIL_PASS not set. Outgoing emails are disabled. Set these in your .env to enable email sends."
+    "⚠️ SENDGRID_API_KEY not set. Outgoing emails are disabled. Set this in your .env to enable email sends."
   );
 }
 
 function sendMail({ to, subject, text, html, attachments }) {
-  if (!transporter) {
+  if (!sgMailConfigured) {
     console.warn(
-      `sendMail skipped - transporter not configured. to=${to} subject=${subject}`
+      `sendMail skipped - SendGrid not configured. to=${to} subject=${subject}`
     );
     return Promise.resolve({ skipped: true });
   }
 
-  const from = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+  const from =
+    process.env.SENDGRID_FROM_EMAIL || "noreply@rayshealthyliving.com";
 
   // Append unsubscribe footer to text and html
   const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
@@ -102,52 +52,55 @@ function sendMail({ to, subject, text, html, attachments }) {
     (text || (html ? html.replace(/<[^>]+>/g, "") : "") || "") + footerText;
   const finalHtml = (html || "") + footerHtml;
 
-  const mail = {
-    from,
+  // SendGrid message format
+  const msg = {
     to,
+    from,
     subject,
     text: finalText,
     html: finalHtml || undefined,
-    attachments: attachments || undefined,
+    replyTo: from,
   };
 
-  // CRITICAL FIX: Wrap sendMail in a Promise with explicit timeout to prevent hanging
+  // Add attachments if provided
+  if (attachments && attachments.length > 0) {
+    msg.attachments = attachments.map((att) => ({
+      content: att.content,
+      filename: att.filename,
+      type: att.contentType || "application/octet-stream",
+    }));
+  }
+
+  // Send via SendGrid with timeout
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       const timeoutErr = new Error(
-        `Email send timeout (60s) for ${to}. Gmail SMTP may be unreachable from this location.`
+        `Email send timeout (10s) for ${to}. SendGrid request took too long.`
       );
       console.error(`⏱️ TIMEOUT: ${timeoutErr.message} - Subject: ${subject}`);
-      console.error("   💡 Check if Gmail is blocking Render's IP address");
       reject(timeoutErr);
-    }, 60000); // 60 second timeout (Gmail can be slow initially)
+    }, 10000); // 10 second timeout (SendGrid is usually very fast)
 
-    transporter.sendMail(mail, (err, info) => {
-      clearTimeout(timeoutId);
-
-      if (err) {
-        console.error(`❌ Email send failed for ${to}:`, err?.message || err);
-        console.error(`   Subject: ${subject}`);
-        console.error(`   Error code: ${err?.code}`);
-        if (err?.code === "ETIMEDOUT" || err?.code === "ECONNREFUSED") {
-          console.error("   💡 Connection issue with Gmail SMTP. Check:");
-          console.error("      - EMAIL_PASS must be Gmail App Password");
-          console.error(
-            "      - Check https://myaccount.google.com/security for blocks"
-          );
-          console.error("      - Wait a minute and retry");
-        }
-        reject(err);
-      } else {
+    sgMail
+      .send(msg)
+      .then((response) => {
+        clearTimeout(timeoutId);
         console.log(
-          `✅ Email sent successfully to ${to}: ${
-            info?.messageId || "unknown ID"
-          }`
+          `✅ Email sent successfully to ${to} via SendGrid: ${response[0]?.statusCode}`
         );
         console.log(`   Subject: ${subject}`);
-        resolve(info);
-      }
-    });
+        resolve(response[0]);
+      })
+      .catch((err) => {
+        clearTimeout(timeoutId);
+        console.error(`❌ Email send failed for ${to}:`, err?.message || err);
+        console.error(`   Subject: ${subject}`);
+        if (err.response) {
+          console.error(`   Error code: ${err.response.statusCode}`);
+          console.error(`   Error details:`, err.response.body);
+        }
+        reject(err);
+      });
   });
 }
 
@@ -169,7 +122,9 @@ const isProduction = process.env.NODE_ENV === "production";
 console.log(`📧 Email Service initialized:`);
 console.log(`   - Frontend URL: ${FRONTEND_URL}`);
 console.log(`   - Environment: ${isProduction ? "Production" : "Development"}`);
-console.log(`   - Email configured: ${transporter ? "Yes" : "No"}`);
+console.log(
+  `   - Email configured: ${sgMailConfigured ? "Yes (SendGrid)" : "No"}`
+);
 console.log(`   - Working directory: ${process.cwd()}`);
 
 // Log available manual files at startup
