@@ -62,13 +62,46 @@ function sendMail({ to, subject, text, html, attachments }) {
     replyTo: from,
   };
 
-  // Add attachments if provided
+  // Add attachments if provided - convert to SendGrid format
   if (attachments && attachments.length > 0) {
-    msg.attachments = attachments.map((att) => ({
-      content: att.content,
-      filename: att.filename,
-      type: att.contentType || "application/octet-stream",
-    }));
+    msg.attachments = attachments
+      .map((att) => {
+        try {
+          let content = att.content;
+
+          // If attachment has a file path, read it as base64
+          if (att.path && !att.content) {
+            try {
+              const fileContent = fs.readFileSync(att.path);
+              content = fileContent.toString("base64");
+            } catch (fileErr) {
+              console.warn(
+                `Could not read attachment file ${att.path}:`,
+                fileErr?.message
+              );
+              return null; // Skip this attachment if file can't be read
+            }
+          }
+          // If content is a Buffer, convert to base64 string
+          else if (Buffer.isBuffer(content)) {
+            content = content.toString("base64");
+          }
+          // If content is a string but not base64, encode it
+          else if (typeof content === "string" && !att.isBase64) {
+            content = Buffer.from(content).toString("base64");
+          }
+
+          return {
+            content: content,
+            filename: att.filename || "attachment",
+            type: att.contentType || att.type || "application/octet-stream",
+          };
+        } catch (err) {
+          console.warn("Error processing attachment:", err?.message);
+          return null; // Skip this attachment if there's an error
+        }
+      })
+      .filter((att) => att !== null); // Remove null entries
   }
 
   // Send via SendGrid with timeout
