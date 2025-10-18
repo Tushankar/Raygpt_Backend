@@ -12,6 +12,16 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+  // CRITICAL: Add timeout settings to prevent hanging in production
+  connectionTimeout: 5000, // 5 seconds to connect
+  socketTimeout: 5000, // 5 seconds for socket operations
+  // Connection pool settings for better reliability
+  pool: {
+    maxConnections: 5,
+    maxMessages: 100,
+    rateDelta: 20000, // milliseconds for rate limiting
+    rateLimit: 14, // max messages per rateDelta
+  },
 });
 
 // Ensure upload directory exists
@@ -93,19 +103,47 @@ router.patch("/:id/status", authenticateAdmin, async (req, res) => {
             clientBaseUrl
           );
           if (result.data && result.data.email) {
-            await transporter.sendMail({
-              from: process.env.EMAIL_USER,
-              to: result.data.email,
-              subject,
-              text,
-              html,
+            // Wrap sendMail with proper timeout handling
+            await new Promise((resolve, reject) => {
+              const timeoutId = setTimeout(() => {
+                const timeoutErr = new Error(
+                  `Email send timeout (30s) for ${result.data.email}. Nodemailer may be hanging due to network issues.`
+                );
+                console.error(`⏱️ TIMEOUT: ${timeoutErr.message}`);
+                reject(timeoutErr);
+              }, 30000);
+
+              transporter.sendMail(
+                {
+                  from: process.env.EMAIL_USER,
+                  to: result.data.email,
+                  subject,
+                  text,
+                  html,
+                },
+                (err, info) => {
+                  clearTimeout(timeoutId);
+                  if (err) {
+                    console.error(
+                      `❌ Failed to send expert request notification to ${result.data.email}:`,
+                      err?.message || err
+                    );
+                    reject(err);
+                  } else {
+                    console.log(
+                      `✅ Expert notification email sent to ${result.data.email} (status: ${status})`
+                    );
+                    resolve(info);
+                  }
+                }
+              );
             });
-            console.log(
-              `Expert notification email sent to ${result.data.email} for request ${id}`
-            );
           }
         } catch (err) {
-          console.error("Failed to send expert notification email:", err);
+          console.error(
+            "Failed to send expert notification email:",
+            err?.message || err
+          );
         }
       })();
 

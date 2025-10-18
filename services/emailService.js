@@ -15,6 +15,25 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
     },
+    // CRITICAL: Add timeout settings to prevent hanging in production
+    connectionTimeout: 5000, // 5 seconds to connect
+    socketTimeout: 5000, // 5 seconds for socket operations
+    // Connection pool settings for better reliability
+    pool: {
+      maxConnections: 5,
+      maxMessages: 100,
+      rateDelta: 20000, // milliseconds for rate limiting
+      rateLimit: 14, // max messages per rateDelta
+    },
+  });
+
+  // Verify transporter connection on startup
+  transporter.verify((err, success) => {
+    if (err) {
+      console.error("❌ Email transporter verification failed:", err?.message);
+    } else if (success) {
+      console.log("✅ Email transporter verified and ready");
+    }
   });
 } else {
   console.warn(
@@ -65,7 +84,35 @@ function sendMail({ to, subject, text, html, attachments }) {
     attachments: attachments || undefined,
   };
 
-  return transporter.sendMail(mail);
+  // CRITICAL FIX: Wrap sendMail in a Promise with explicit timeout to prevent hanging
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      const timeoutErr = new Error(
+        `Email send timeout (30s) for ${to}. Nodemailer may be hanging due to network issues.`
+      );
+      console.error(`⏱️ TIMEOUT: ${timeoutErr.message} - Subject: ${subject}`);
+      reject(timeoutErr);
+    }, 30000); // 30 second timeout
+
+    transporter.sendMail(mail, (err, info) => {
+      clearTimeout(timeoutId);
+
+      if (err) {
+        console.error(`❌ Email send failed for ${to}:`, err?.message || err);
+        console.error(`   Subject: ${subject}`);
+        console.error(`   Error details:`, err);
+        reject(err);
+      } else {
+        console.log(
+          `✅ Email sent successfully to ${to}: ${
+            info?.messageId || "unknown ID"
+          }`
+        );
+        console.log(`   Subject: ${subject}`);
+        resolve(info);
+      }
+    });
+  });
 }
 
 // Utility to return a random delay between min and max (milliseconds)
@@ -598,18 +645,23 @@ export async function sendFirstEmail({ email, name, language = "en" }) {
     const firstEmail = emailSequence[0];
     const rendered = firstEmail.render(name, email);
 
-    await sendMail({
+    console.log(`📧 Sending first email to ${email} in ${language}...`);
+    const result = await sendMail({
       to: email,
       subject: firstEmail.subject,
       text: rendered.text,
       html: rendered.html,
     });
 
-    console.log(`First email (manual) sent to ${email} in ${language}`);
-    return { success: true, emailSent: firstEmail.subject };
+    console.log(`✅ First email (manual) sent to ${email} in ${language}`);
+    return {
+      success: true,
+      emailSent: firstEmail.subject,
+      messageId: result?.messageId,
+    };
   } catch (err) {
     console.error(
-      `Failed to send first email to ${email}:`,
+      `❌ Failed to send first email to ${email}:`,
       err?.message || err
     );
     throw err;
@@ -657,7 +709,13 @@ export async function scheduleRemainingEmails(
       try {
         const rendered = item.render(name, email);
 
-        await sendMail({
+        console.log(
+          `📧 Scheduling email ${
+            idx + 2
+          } to ${email} in ${language} (delay: ${delay}ms)...`
+        );
+
+        const result = await sendMail({
           to: email,
           subject: item.subject,
           text: rendered.text,
@@ -666,15 +724,16 @@ export async function scheduleRemainingEmails(
         });
 
         console.log(
-          `Email ${idx + 2} sent to ${email} in ${language} (subject: ${
-            item.subject
-          })`
+          `✅ Email ${idx + 2} sent to ${email} in ${language} (messageId: ${
+            result?.messageId || "unknown"
+          }, subject: ${item.subject})`
         );
       } catch (err) {
         console.error(
-          `Failed to send email ${idx + 2} to ${email}:`,
+          `❌ Failed to send email ${idx + 2} to ${email}:`,
           err?.message || err
         );
+        console.error(`   Language: ${language}, Subject: ${item.subject}`);
       }
     }, delay);
   });
