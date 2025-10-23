@@ -188,22 +188,22 @@ try {
 // Spanish email templates
 const EMAIL_SEQUENCE_ES = [
   {
-    subject: "Tu Manual de Oportunidad de Negocio de Vitaminas — Aquí está",
+    subject: "Tu Preview de Oportunidad de Negocio de Vitaminas — Aquí está",
     render: (name, email) => {
       const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
       const downloadUrl = `${backendUrl}/api/download/manual`;
       const plain = `Hola ${
         name || "amigo/a"
-      },\n\nGracias por registrarte — tu Manual de Oportunidad de Negocio de Vitaminas está listo. Descárgalo aquí: ${downloadUrl}\n\nSaludos,\nEquipo de Ray's Healthy Living`;
+      },\n\nGracias por registrarte — tu Preview de Oportunidad de Negocio de Vitaminas está listo. Descárgalo aquí: ${downloadUrl}\n\nSaludos,\nEquipo de Ray's Healthy Living`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Ray's Healthy Living — Tu Manual está listo</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Ray's Healthy Living — Tu Preview está listo</h2>
           <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
             name || "amigo/a"
           },</p>
-          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Gracias por solicitar el Manual de Oportunidad de Negocio de Vitaminas. Puedes descargarlo ahora:</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Gracias por solicitar el Preview de Oportunidad de Negocio de Vitaminas. Puedes descargarlo ahora:</p>
           <div style="text-align:center;margin:25px 0">
-            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">📥 Descargar el Manual</a>
+            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">📥 Descargar el Preview</a>
           </div>
           <p style="color:#666666;font-size:14px;line-height:1.5;margin:20px 0">Si el botón no funciona, copia y pega este enlace en tu navegador: ${downloadUrl}</p>
           <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Equipo de Ray's Healthy Living</p>
@@ -260,7 +260,7 @@ const EMAIL_SEQUENCE_ES = [
     render: (name) => {
       const plain = `Hola ${
         name || "amigo/a"
-      },\n\nEsto es lo que recibes con Ray's Healthy Living:\n\n• Manual de Oportunidad – Tu plan paso a paso para comenzar\n• Línea de Productos Probada – Acceso a más de 1,000 productos de bienestar\n• Sistemas de Configuración de Tienda – Orientación sobre diseño, inventario y operaciones\n• Entrenamiento y Mentoría – Aprende directamente de quienes lo han hecho\n• Comunidad y Apoyo – Únete a una red de dueños de tiendas y visionarios\n\nNo necesitas experiencia previa en negocios — solo pasión y el sistema correcto. Nosotros nos encargamos del marco. Tú aportas la determinación.\n\nSaludos,\nRay's Healthy Living`;
+      },\n\nEsto es lo que recibes con Ray's Healthy Living:\n\n• Preview de Oportunidad – Tu plan paso a paso para comenzar\n• Línea de Productos Probada – Acceso a más de 1,000 productos de bienestar\n• Sistemas de Configuración de Tienda – Orientación sobre diseño, inventario y operaciones\n• Entrenamiento y Mentoría – Aprende directamente de quienes lo han hecho\n• Comunidad y Apoyo – Únete a una red de dueños de tiendas y visionarios\n\nNo necesitas experiencia previa en negocios — solo pasión y el sistema correcto. Nosotros nos encargamos del marco. Tú aportas la determinación.\n\nSaludos,\nRay's Healthy Living`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
           <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Esto es lo que recibes</h2>
@@ -268,7 +268,7 @@ const EMAIL_SEQUENCE_ES = [
             name || "amigo/a"
           },</p>
           <div style="margin: 25px 0;">
-            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Manual de Oportunidad</strong> – Tu plan paso a paso para comenzar.</p>
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Preview de Oportunidad</strong> – Tu plan paso a paso para comenzar.</p>
             <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Línea de Productos Probada</strong> – Acceso a más de 1,000 productos de bienestar.</p>
             <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Sistemas de Configuración de Tienda</strong> – Orientación sobre diseño, inventario y operaciones.</p>
             <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Entrenamiento y Mentoría</strong> – Aprende directamente de quienes lo han hecho.</p>
@@ -300,27 +300,27 @@ const EMAIL_SEQUENCE_ES = [
     },
   },
   {
-    subject: "Reclama tu Manual Gratuito y Mantente Conectado",
+    subject: "Reclama tu System Guide Gratuito y Mantente Conectado",
     render: (name) => {
       const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
       const downloadUrl = `${backendUrl}/api/download/manual`;
       const plain = `Hola ${
         name || "amigo/a"
-      },\n\nCuando te registraste, recibiste:\n• El Manual completo de Oportunidad de Negocio de Tienda de Vitaminas\n• Perspectivas semanales sobre emprendimiento en salud y bienestar\n• Invitaciones exclusivas a seminarios web y sesiones informativas\n\nEnlace del manual: ${downloadUrl}\n\nSaludos,\nRay's Healthy Living`;
+      },\n\nCuando te registraste, recibiste:\n• El System Guide completo de Oportunidad de Negocio de Tienda de Vitaminas\n• Perspectivas semanales sobre emprendimiento en salud y bienestar\n• Invitaciones exclusivas a seminarios web y sesiones informativas\n\nEnlace del System Guide: ${downloadUrl}\n\nSaludos,\nRay's Healthy Living`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Reclama tu Manual Gratuito y Mantente Conectado</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Reclama tu System Guide Gratuito y Mantente Conectado</h2>
           <p style="color:#f0f0f0;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
             name || "amigo/a"
           },</p>
           <p style="color:#e0e0e0;font-size:16px;line-height:1.6;margin:0 0 20px">Cuando te registraste, recibiste:</p>
           <div style="margin: 20px 0;">
-            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> El Manual completo de Oportunidad de Negocio de Tienda de Vitaminas</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> El System Guide completo de Oportunidad de Negocio de Tienda de Vitaminas</p>
             <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Perspectivas semanales sobre emprendimiento en salud y bienestar</p>
             <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Invitaciones exclusivas a seminarios web y sesiones informativas</p>
           </div>
           <div style="text-align:center;margin:25px 0">
-            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">👉 Sí, Envíame el Manual</a>
+            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">👉 Sí, Envíame el System Guide</a>
           </div>
           <p style="color:#cccccc;font-size:16px;margin-top:30px">— Ray's Healthy Living</p>
         </div>`;
@@ -328,25 +328,25 @@ const EMAIL_SEQUENCE_ES = [
     },
   },
   {
-    subject: "🎁 Aquí está tu Manual de Negocio Final + Próximos Pasos",
+    subject: "🎁 Aquí está tu System Guide de Negocio Final + Próximos Pasos",
     render: (name) => {
       const scheduleUrl = "https://calendly.com/sahatushankar234/30min";
       const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
       const finalManualUrl = `${backendUrl}/api/download/final-manual`;
       const plain = `Hola ${
         name || "amigo/a"
-      },\n\n¡Aquí está tu correo final! 🎉\n\nComo prometí, te envío la versión FINAL y más completa de nuestro Manual de Oportunidad de Negocio. Este manual actualizado incluye:\n\n• Estrategias avanzadas no cubiertas en la versión inicial\n• Estudios de casos reales de dueños de tiendas exitosos\n• Datos de mercado actualizados y proyecciones para 2024-2025\n• Cronograma de implementación paso a paso\n• Contactos exclusivos de proveedores y guías de precios\n\nDescarga tu manual final: ${finalManualUrl}\n\nAhora que tienes toda la información, es hora de tomar acción. Cada negocio exitoso comienza con un solo paso. Para ti, ese paso es programar una llamada de consulta gratuita. En esta llamada, discutiremos tus objetivos, te guiaremos a través del sistema y te mostraremos cómo lanzar tu propia tienda.\n\nReserva tu llamada: ${scheduleUrl}\n\nLos espacios son limitados — asegura tu lugar hoy y comienza a construir tu legado con Ray's Healthy Living.\n\nEste es tu momento. No lo dejes pasar.\n\nSaludos,\nEquipo de Ray's Healthy Living`;
+      },\n\n¡Aquí está tu correo final! 🎉\n\nComo prometí, te envío la versión FINAL y más completa de nuestro System Guide de Oportunidad de Negocio. Este System Guide actualizado incluye:\n\n• Estrategias avanzadas no cubiertas en la versión inicial\n• Estudios de casos reales de dueños de tiendas exitosos\n• Datos de mercado actualizados y proyecciones para 2024-2025\n• Cronograma de implementación paso a paso\n• Contactos exclusivos de proveedores y guías de precios\n\nDescarga tu System Guide final: ${finalManualUrl}\n\nAhora que tienes toda la información, es hora de tomar acción. Cada negocio exitoso comienza con un solo paso. Para ti, ese paso es programar una llamada de consulta gratuita. En esta llamada, discutiremos tus objetivos, te guiaremos a través del sistema y te mostraremos cómo lanzar tu propia tienda.\n\nReserva tu llamada: ${scheduleUrl}\n\nLos espacios son limitados — asegura tu lugar hoy y comienza a construir tu legado con Ray's Healthy Living.\n\nEste es tu momento. No lo dejes pasar.\n\nSaludos,\nEquipo de Ray's Healthy Living`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:26px;font-weight:bold">🎁 Aquí está tu Manual de Negocio Final</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:26px;font-weight:bold">🎁 Aquí está tu System Guide de Negocio Final</h2>
           <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hola ${
             name || "amigo/a"
           },</p>
           <div style="background:#fff3e0;border-left:4px solid #E4631F;padding:20px;margin:20px 0;border-radius:0 8px 8px 0">
             <p style="color:#d4620a;font-size:18px;font-weight:bold;margin:0 0 10px">🎉 ¡Aquí está tu correo final!</p>
-            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0">Como prometí, te envío la versión FINAL y más completa de nuestro Manual de Oportunidad de Negocio.</p>
+            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0">Como prometí, te envío la versión FINAL y más completa de nuestro System Guide de Oportunidad de Negocio.</p>
           </div>
-          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:20px 0">Este manual actualizado incluye:</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:20px 0">Este System Guide actualizado incluye:</p>
           <div style="margin: 20px 0;">
             <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Estrategias avanzadas no cubiertas en la versión inicial</p>
             <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Estudios de casos reales de dueños de tiendas exitosos</p>
@@ -355,7 +355,7 @@ const EMAIL_SEQUENCE_ES = [
             <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Contactos exclusivos de proveedores y guías de precios</p>
           </div>
           <div style="text-align:center;margin:25px 0">
-            <a href="${finalManualUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;margin-bottom:15px">📥 Descarga tu Manual Final</a>
+            <a href="${finalManualUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;margin-bottom:15px">📥 Descarga tu System Guide Final</a>
           </div>
           <div style="border-top:2px solid #E4631F;padding-top:25px;margin-top:30px">
             <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Ahora que tienes toda la información, es hora de tomar acción. Cada negocio exitoso comienza con un solo paso. Para ti, ese paso es programar una llamada de consulta gratuita.</p>
@@ -424,23 +424,23 @@ const EMAIL_SEQUENCE_ES = [
 // The email sequence content with HTML templates (Ray's Healthy Living branded)
 const EMAIL_SEQUENCE = [
   {
-    subject: "Your Vitamin Store Opportunity Manual — Here it is",
+    subject: "Your Vitamin Store Opportunity Preview— Here it is",
     render: (name, email) => {
       // Use the backend URL for production (Render) since files are served from server
       const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
       const downloadUrl = `${backendUrl}/api/download/manual`;
       const plain = `Hi ${
         name || "there"
-      },\n\nThanks for signing up — your Vitamin Store Opportunity Manual is ready. Download here: ${downloadUrl}\n\nBest,\nRay's Healthy Living Team`;
+      },\n\nThanks for signing up — your Vitamin Store Opportunity Preview is ready. Download here: ${downloadUrl}\n\nBest,\nRay's Healthy Living Team`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Ray's Healthy Living — Your Manual is ready</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Ray's Healthy Living — Your Preview is ready</h2>
           <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hi ${
             name || "there"
           },</p>
-          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Thanks for requesting the Vitamin Store Opportunity Manual. You can download it now:</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Thanks for requesting the Vitamin Store Opportunity Preview. You can download it now:</p>
           <div style="text-align:center;margin:25px 0">
-            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">📥 Download the Manual</a>
+            <a href="${downloadUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block">📥 Download the Preview</a>
           </div>
           <p style="color:#666666;font-size:14px;line-height:1.5;margin:20px 0">If the button doesn't work, copy and paste this link into your browser: ${downloadUrl}</p>
           <p style="margin-top:30px;color:#2c2c2c;font-size:16px">— Ray's Healthy Living Team</p>
@@ -497,7 +497,7 @@ const EMAIL_SEQUENCE = [
     render: (name) => {
       const plain = `Hi ${
         name || "there"
-      },\n\nHere's what you receive with Ray's Healthy Living:\n\n• Opportunity Manual – Your step-by-step blueprint to start\n• Proven Product Line – Access to over 1,000 wellness products\n• Store Setup Systems – Layout, inventory, and operations guidance\n• Training & Mentorship – Learn directly from those who've done it\n• Community & Support – Join a network of store owners and visionaries\n\nYou don't need prior business experience — just passion and the right system. We'll handle the framework. You bring the drive.\n\nBest,\nRay's Healthy Living`;
+      },\n\nHere's what you receive with Ray's Healthy Living:\n\n• Opportunity System Guide – Your step-by-step blueprint to start\n• Proven Product Line – Access to over 1,000 wellness products\n• Store Setup Systems – Layout, inventory, and operations guidance\n• Training & Mentorship – Learn directly from those who've done it\n• Community & Support – Join a network of store owners and visionaries\n\nYou don't need prior business experience — just passion and the right system. We'll handle the framework. You bring the drive.\n\nBest,\nRay's Healthy Living`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
           <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Here's What You Receive</h2>
@@ -505,7 +505,7 @@ const EMAIL_SEQUENCE = [
             name || "there"
           },</p>
           <div style="margin: 25px 0;">
-            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Opportunity Manual</strong> – Your step-by-step blueprint to start.</p>
+            <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Opportunity System Guide</strong> – Your step-by-step blueprint to start.</p>
             <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Proven Product Line</strong> – Access to over 1,000 wellness products.</p>
             <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Store Setup Systems</strong> – Layout, inventory, and operations guidance.</p>
             <p style="color:#e0e0e0; margin: 15px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> <strong style="color:#ffffff">Training & Mentorship</strong> – Learn directly from those who've done it.</p>
@@ -537,23 +537,23 @@ const EMAIL_SEQUENCE = [
     },
   },
   {
-    subject: "Claim Your Free Manual & Stay Connected",
+    subject: "Claim Your Free System Guide & Stay Connected",
     render: (name) => {
       // Use the backend URL for production (Render) since files are served from server
       const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
       const downloadUrl = `${backendUrl}/api/download/manual`;
       const plain = `Hi ${
         name || "there"
-      },\n\nWhen you signed up, you received:\n• The full Vitamin Store Business Opportunity Manual\n• Weekly insights on health and wellness entrepreneurship\n• Exclusive invitations to webinars and info sessions\n\nManual link: ${downloadUrl}\n\nBest,\nRay's Healthy Living`;
+      },\n\nWhen you signed up, you received:\n• The full Vitamin Store Business Opportunity System Guide\n• Weekly insights on health and wellness entrepreneurship\n• Exclusive invitations to webinars and info sessions\n\nSystem Guide link: ${downloadUrl}\n\nBest,\nRay's Healthy Living`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#ffffff;background:linear-gradient(180deg,#1a1a1a,#0f0f0f);padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #333">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Claim Your Free Manual & Stay Connected</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:24px;font-weight:bold">Claim Your Free System Guide & Stay Connected</h2>
           <p style="color:#f0f0f0;font-size:16px;line-height:1.6;margin:0 0 15px">Hi ${
             name || "there"
           },</p>
           <p style="color:#e0e0e0;font-size:16px;line-height:1.6;margin:0 0 20px">When you signed up, you received:</p>
           <div style="margin: 20px 0;">
-            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> The full Vitamin Store Business Opportunity Manual</p>
+            <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> The full Vitamin Store Business Opportunity System Guide</p>
             <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Weekly insights on health and wellness entrepreneurship</p>
             <p style="color:#e0e0e0; margin: 12px 0;font-size:16px;line-height:1.5"><strong style="color:#E4631F">•</strong> Exclusive invitations to webinars and info sessions</p>
           </div>
@@ -566,7 +566,7 @@ const EMAIL_SEQUENCE = [
     },
   },
   {
-    subject: "🎁 Here's Your Final Business Manual + Next Steps",
+    subject: "🎁 Here's Your Final Business System Guide + Next Steps",
     render: (name) => {
       const scheduleUrl = "https://calendly.com/sahatushankar234/30min";
       // Use the backend URL for production (Render) since files are served from server
@@ -574,18 +574,18 @@ const EMAIL_SEQUENCE = [
       const finalManualUrl = `${backendUrl}/api/download/final-manual`;
       const plain = `Hi ${
         name || "there"
-      },\n\nHere is your final email! 🎉\n\nAs promised, I'm sending you the FINAL and most comprehensive version of our Business Opportunity Manual. This updated manual includes:\n\n• Advanced strategies not covered in the initial version\n• Real case studies from successful store owners\n• Updated market data and projections for 2024-2025\n• Step-by-step implementation timeline\n• Exclusive supplier contacts and pricing guides\n\nDownload your final manual: ${finalManualUrl}\n\nNow that you have all the information, it's time to take action. Every successful business starts with a single step. For you, that step is scheduling a free consultation call. On this call, we'll discuss your goals, walk you through the system, and show you how to launch your own store.\n\nBook your call: ${scheduleUrl}\n\nSpaces are limited — secure your spot today and start building your legacy with Ray's Healthy Living.\n\nThis is your moment. Don't let it pass.\n\nBest,\nRay's Healthy Living Team`;
+      },\n\nHere is your final email! 🎉\n\nAs promised, I'm sending you the FINAL and most comprehensive version of our Business Opportunity System Guide. This updated manual includes:\n\n• Advanced strategies not covered in the initial version\n• Real case studies from successful store owners\n• Updated market data and projections for 2024-2025\n• Step-by-step implementation timeline\n• Exclusive supplier contacts and pricing guides\n\nDownload your final System Guide: ${finalManualUrl}\n\nNow that you have all the information, it's time to take action. Every successful business starts with a single step. For you, that step is scheduling a free consultation call. On this call, we'll discuss your goals, walk you through the system, and show you how to launch your own store.\n\nBook your call: ${scheduleUrl}\n\nSpaces are limited — secure your spot today and start building your legacy with Ray's Healthy Living.\n\nThis is your moment. Don't let it pass.\n\nBest,\nRay's Healthy Living Team`;
       const html = `
         <div style="font-family: Arial,Helvetica,sans-serif;color:#2c2c2c;background:#ffffff;padding:30px;border-radius:8px;max-width:600px;margin:0 auto;border:1px solid #e0e0e0">
-          <h2 style="color:#E4631F;margin:0 0 20px;font-size:26px;font-weight:bold">🎁 Here's Your Final Business Manual</h2>
+          <h2 style="color:#E4631F;margin:0 0 20px;font-size:26px;font-weight:bold">🎁 Here's Your Final Business System Guide</h2>
           <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 15px">Hi ${
             name || "there"
           },</p>
           <div style="background:#fff3e0;border-left:4px solid #E4631F;padding:20px;margin:20px 0;border-radius:0 8px 8px 0">
             <p style="color:#d4620a;font-size:18px;font-weight:bold;margin:0 0 10px">🎉 Here is your final email!</p>
-            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0">As promised, I'm sending you the FINAL and most comprehensive version of our Business Opportunity Manual.</p>
+            <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0">As promised, I'm sending you the FINAL and most comprehensive version of our Business Opportunity System Guide.</p>
           </div>
-          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:20px 0">This updated manual includes:</p>
+          <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:20px 0">This updated System Guide includes:</p>
           <div style="margin: 20px 0;">
             <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Advanced strategies not covered in the initial version</p>
             <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Real case studies from successful store owners</p>
@@ -594,7 +594,7 @@ const EMAIL_SEQUENCE = [
             <p style="color:#2c2c2c; margin: 8px 0;font-size:15px;line-height:1.5"><strong style="color:#E4631F">✓</strong> Exclusive supplier contacts and pricing guides</p>
           </div>
           <div style="text-align:center;margin:25px 0">
-            <a href="${finalManualUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;margin-bottom:15px">📥 Download Your Final Manual</a>
+            <a href="${finalManualUrl}" style="background:#E4631F;color:#ffffff;padding:15px 25px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;display:inline-block;margin-bottom:15px">📥 Download Your Final System Guide</a>
           </div>
           <div style="border-top:2px solid #E4631F;padding-top:25px;margin-top:30px">
             <p style="color:#2c2c2c;font-size:16px;line-height:1.6;margin:0 0 20px">Now that you have all the information, it's time to take action. Every successful business starts with a single step. For you, that step is scheduling a free consultation call.</p>
