@@ -199,26 +199,39 @@ export async function scheduleThreeEmailSequence(
     language
   );
 
+  console.log(
+    `📧 Scheduling ${templates.length} automation emails for ${email} in ${language}`
+  );
+
   templates.forEach((tpl, idx) => {
     const delay = delays[idx];
     setTimeout(async () => {
       try {
-        await emailService.sendMail({
+        console.log(
+          `⏳ Sending automation email ${idx + 1}/${templates.length} to ${email} in ${language}...`
+        );
+        
+        const result = await emailService.sendMail({
           to: email,
           subject: tpl.subject,
           html: tpl.html,
           text: tpl.text,
         });
+        
         console.log(
-          `U20X automation email ${idx + 1} sent to ${email} in ${language} (Day ${
+          `✅ Automation email ${idx + 1} sent to ${email} in ${language} (Day ${
             idx === 0 ? 1 : idx === 1 ? 3 : 7
-          })`
+          }) - MessageId: ${result?.messageId || 'unknown'}`
         );
       } catch (err) {
         console.error(
-          `Failed to send U20X automation email ${idx + 1} to ${email}:`,
+          `❌ Failed to send automation email ${idx + 1} to ${email}:`,
           err?.message || err
         );
+        if (err.response) {
+          console.error(`   SendGrid Error Code: ${err.response.statusCode}`);
+          console.error(`   SendGrid Error Details:`, err.response.body);
+        }
       }
     }, delay);
   });
@@ -226,8 +239,10 @@ export async function scheduleThreeEmailSequence(
   const totalDuration = Math.max(...delays);
   return {
     scheduled: true,
+    emailCount: templates.length,
     estimatedDurationMs: totalDuration,
     schedule: isTestMode ? "Test mode: 30s, 1m, 90s" : "Day 1, Day 3, Day 7",
+    details: `Automation emails will be sent to ${email} in ${language} language`,
   };
 }
 

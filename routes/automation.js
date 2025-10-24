@@ -121,7 +121,12 @@ router.post("/trigger", async (req, res) => {
           },
         ],
       })
-      .catch((e) => console.error(e));
+      .then((result) => {
+        console.log(`✅ Initial calendar invite sent to ${email}`);
+      })
+      .catch((e) => {
+        console.error(`❌ Failed to send initial calendar invite to ${email}:`, e?.message || e);
+      });
 
     // schedule the tailored 3-email automation sequence
     automationEmailService
@@ -132,13 +137,23 @@ router.post("/trigger", async (req, res) => {
         leadId: id,
         language: data.language || "en",
       })
-      .catch((e) => console.error(e));
+      .then((result) => {
+        console.log(`✅ Automation email sequence scheduled:`, result);
+      })
+      .catch((e) => {
+        console.error(`❌ Failed to schedule automation sequence for ${email}:`, e?.message || e);
+      });
 
     // SMS sequence if phone present and Twilio configured
     if (phone) {
       smsService
         .scheduleSmsSequence({ to: phone, bookingLink: link, leadId: id })
-        .catch((e) => console.error(e));
+        .then((result) => {
+          console.log(`✅ SMS sequence scheduled:`, result);
+        })
+        .catch((e) => {
+          console.error(`❌ Failed to schedule SMS sequence for ${phone}:`, e?.message || e);
+        });
     }
 
     // Persist that we've triggered automation for this lead so it won't be
