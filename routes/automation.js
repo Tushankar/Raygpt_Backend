@@ -117,7 +117,7 @@ router.post("/trigger", async (req, res) => {
           {
             filename: "rayOne-invite.ics",
             content: ics,
-            contentType: "text/calendar; charset=UTF-8; method=REQUEST",
+            contentType: "text/calendar",
           },
         ],
       })
