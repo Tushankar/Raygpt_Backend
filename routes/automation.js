@@ -63,14 +63,8 @@ router.post("/trigger", async (req, res) => {
       return res.status(404).json({ success: false, error: "Lead not found" });
 
     const data = doc.data();
-    // Idempotency: if we've already sent automation for this lead, skip scheduling again
-    if (data.automationSent) {
-      return res.json({
-        success: true,
-        triggered: false,
-        message: "Automation already sent",
-      });
-    }
+    // Allow re-triggering automation even if it was sent before
+    // (removed idempotency check to allow manual re-triggers)
     const email = data.email;
     const name = data.name;
     const phone = data.phone;
@@ -125,7 +119,10 @@ router.post("/trigger", async (req, res) => {
         console.log(`✅ Initial calendar invite sent to ${email}`);
       })
       .catch((e) => {
-        console.error(`❌ Failed to send initial calendar invite to ${email}:`, e?.message || e);
+        console.error(
+          `❌ Failed to send initial calendar invite to ${email}:`,
+          e?.message || e
+        );
       });
 
     // schedule the tailored 3-email automation sequence
@@ -141,7 +138,10 @@ router.post("/trigger", async (req, res) => {
         console.log(`✅ Automation email sequence scheduled:`, result);
       })
       .catch((e) => {
-        console.error(`❌ Failed to schedule automation sequence for ${email}:`, e?.message || e);
+        console.error(
+          `❌ Failed to schedule automation sequence for ${email}:`,
+          e?.message || e
+        );
       });
 
     // SMS sequence if phone present and Twilio configured
@@ -152,7 +152,10 @@ router.post("/trigger", async (req, res) => {
           console.log(`✅ SMS sequence scheduled:`, result);
         })
         .catch((e) => {
-          console.error(`❌ Failed to schedule SMS sequence for ${phone}:`, e?.message || e);
+          console.error(
+            `❌ Failed to schedule SMS sequence for ${phone}:`,
+            e?.message || e
+          );
         });
     }
 

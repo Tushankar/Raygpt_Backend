@@ -3,7 +3,7 @@ import emailService from "./emailService.js";
 // 3-email sequence for 'filled but didn't book' automation
 // Day 1, Day 3, Day 7 timing with Ray's Healthy Living branded content
 
-function makeTemplates(name, bookingLink, leadId, language = 'en') {
+function makeTemplates(name, bookingLink, leadId, language = "en") {
   let link =
     bookingLink ||
     process.env.BOOKING_LINK ||
@@ -15,7 +15,7 @@ function makeTemplates(name, bookingLink, leadId, language = 'en') {
     link = `${link}${separator}leadId=${encodeURIComponent(leadId)}`;
   }
 
-  if (language === 'es') {
+  if (language === "es") {
     return makeSpanishTemplates(name, link);
   }
 
@@ -170,7 +170,7 @@ function daysToMs(days) {
 }
 
 export async function scheduleThreeEmailSequence(
-  { email, name, bookingLink, leadId, language = 'en' },
+  { email, name, bookingLink, leadId, language = "en" },
   options = {}
 ) {
   // Default timing: Day 1, Day 3, Day 7
@@ -208,20 +208,24 @@ export async function scheduleThreeEmailSequence(
     setTimeout(async () => {
       try {
         console.log(
-          `⏳ Sending automation email ${idx + 1}/${templates.length} to ${email} in ${language}...`
+          `⏳ Sending automation email ${idx + 1}/${
+            templates.length
+          } to ${email} in ${language}...`
         );
-        
+
         const result = await emailService.sendMail({
           to: email,
           subject: tpl.subject,
           html: tpl.html,
           text: tpl.text,
         });
-        
+
         console.log(
-          `✅ Automation email ${idx + 1} sent to ${email} in ${language} (Day ${
+          `✅ Automation email ${
+            idx + 1
+          } sent to ${email} in ${language} (Day ${
             idx === 0 ? 1 : idx === 1 ? 3 : 7
-          }) - MessageId: ${result?.messageId || 'unknown'}`
+          }) - MessageId: ${result?.messageId || "unknown"}`
         );
       } catch (err) {
         console.error(
