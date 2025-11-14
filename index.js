@@ -101,7 +101,12 @@ app.use(
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Accept",
+      "X-Requested-With",
+    ],
   })
 );
 
@@ -169,6 +174,13 @@ app.use("/api/system-manual", systemManualRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/translate", translationRoutes);
 app.use("/api/contact", contactRoutes);
+
+// CSRF token endpoint
+app.get("/api/csrf-token", (req, res) => {
+  res.json({
+    csrfToken: "dummy-csrf-token", // Replace with actual CSRF token generation if needed
+  });
+});
 
 // Health check endpoint
 app.get("/health", (req, res) => {
