@@ -84,7 +84,9 @@ app.use(
         "http://localhost:5174",
         "http://localhost:3000",
         "https://rayonesystem.netlify.app",
+        "https://rayone.kyptronix.us",
         process.env.FRONTEND_URL,
+        process.env.CLIENT_URL,
       ].filter(Boolean);
 
       console.log(`[CORS] Request from origin: ${origin}`);
