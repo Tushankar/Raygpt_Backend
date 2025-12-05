@@ -1,15 +1,22 @@
 import express from "express";
 import { StoreService } from "../services/storeService.js";
 import { authenticateAdmin } from "../middleware/auth.js";
-import sgMail from "@sendgrid/mail";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { getStoreRequestStatusEmail } from "../utils/emailTemplates.js";
 
 dotenv.config();
 
-// Configure SendGrid
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// Configure Nodemailer with Gmail
+let transporter = null;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 }
 
 const router = express.Router();
@@ -131,24 +138,22 @@ router.patch("/:id/status", authenticateAdmin, async (req, res) => {
             reviewNotes || "",
             clientBaseUrl
           );
-          if (result.data && result.data.email) {
-            // Use SendGrid for sending
+          if (result.data && result.data.email && transporter) {
+            // Use Nodemailer for sending
             (async () => {
               try {
                 const msg = {
                   to: result.data.email,
                   from:
-                    process.env.SENDGRID_FROM_EMAIL ||
-                    "noreply@rayshealthyliving.com",
+                    process.env.EMAIL_USER || "noreply@rayshealthyliving.com",
                   subject,
                   text,
                   html,
                   replyTo:
-                    process.env.SENDGRID_FROM_EMAIL ||
-                    "noreply@rayshealthyliving.com",
+                    process.env.EMAIL_USER || "noreply@rayshealthyliving.com",
                 };
 
-                await sgMail.send(msg);
+                await transporter.sendMail(msg);
                 console.log(
                   `✅ Store request notification email sent to ${result.data.email} (status: ${status})`
                 );

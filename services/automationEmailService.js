@@ -232,10 +232,6 @@ export async function scheduleThreeEmailSequence(
           `❌ Failed to send automation email ${idx + 1} to ${email}:`,
           err?.message || err
         );
-        if (err.response) {
-          console.error(`   SendGrid Error Code: ${err.response.statusCode}`);
-          console.error(`   SendGrid Error Details:`, err.response.body);
-        }
       }
     }, delay);
   });

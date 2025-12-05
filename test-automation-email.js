@@ -16,20 +16,18 @@ async function testAutomationEmail() {
   // Check environment
   console.log("\n📋 Environment Check:");
   console.log(
-    `   - SENDGRID_API_KEY: ${
-      process.env.SENDGRID_API_KEY ? "✅ Set" : "❌ Missing"
-    }`
+    `   - EMAIL_USER: ${process.env.EMAIL_USER ? "✅ Set" : "❌ Missing"}`
   );
   console.log(
-    `   - SENDGRID_FROM_EMAIL: ${
-      process.env.SENDGRID_FROM_EMAIL || "❌ Missing"
-    }`
+    `   - EMAIL_PASS: ${process.env.EMAIL_PASS ? "✅ Set" : "❌ Missing"}`
   );
   console.log(`   - FRONTEND_URL: ${process.env.FRONTEND_URL || "❌ Missing"}`);
   console.log(`   - BOOKING_LINK: ${process.env.BOOKING_LINK || "❌ Missing"}`);
 
-  if (!process.env.SENDGRID_API_KEY) {
-    console.error("\n❌ SENDGRID_API_KEY is not set. Cannot send emails.");
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error(
+      "\n❌ EMAIL_USER and EMAIL_PASS are not set. Cannot send emails."
+    );
     process.exit(1);
   }
 

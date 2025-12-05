@@ -1,32 +1,39 @@
-import sgMail from "@sendgrid/mail";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 
 dotenv.config();
 
-// Configure SendGrid - simpler, more reliable for production
-let sgMailConfigured = false;
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  sgMailConfigured = true;
-  console.log("✅ SendGrid email service initialized");
+// Configure Nodemailer with Gmail credentials
+let transporter = null;
+let nodemailerConfigured = false;
+
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+  nodemailerConfigured = true;
+  console.log("✅ Nodemailer email service initialized with Gmail");
 } else {
   console.warn(
-    "⚠️ SENDGRID_API_KEY not set. Outgoing emails are disabled. Set this in your .env to enable email sends."
+    "⚠️ EMAIL_USER and EMAIL_PASS not set. Outgoing emails are disabled. Set these in your .env to enable email sends."
   );
 }
 
 function sendMail({ to, subject, text, html, attachments }) {
-  if (!sgMailConfigured) {
+  if (!nodemailerConfigured || !transporter) {
     console.warn(
-      `sendMail skipped - SendGrid not configured. to=${to} subject=${subject}`
+      `sendMail skipped - Nodemailer not configured. to=${to} subject=${subject}`
     );
     return Promise.resolve({ skipped: true });
   }
 
-  const from =
-    process.env.SENDGRID_FROM_EMAIL || "noreply@rayshealthyliving.com";
+  const from = process.env.EMAIL_USER || "noreply@rayshealthyliving.com";
 
   // Append unsubscribe footer to text and html
   const backendUrl = process.env.BACKEND_URL || FRONTEND_URL;
@@ -52,28 +59,37 @@ function sendMail({ to, subject, text, html, attachments }) {
     (text || (html ? html.replace(/<[^>]+>/g, "") : "") || "") + footerText;
   const finalHtml = (html || "") + footerHtml;
 
-  // SendGrid message format
-  const msg = {
-    to,
+  // Nodemailer message format
+  const mailOptions = {
     from,
+    to,
     subject,
     text: finalText,
     html: finalHtml || undefined,
     replyTo: from,
   };
 
-  // Add attachments if provided - convert to SendGrid format
+  // Add attachments if provided - convert to Nodemailer format
   if (attachments && attachments.length > 0) {
-    msg.attachments = attachments
+    mailOptions.attachments = attachments
       .map((att) => {
         try {
           let content = att.content;
+          let filename = att.filename || "attachment";
 
-          // If attachment has a file path, read it as base64
+          // If attachment has a file path, read it
           if (att.path && !att.content) {
             try {
-              const fileContent = fs.readFileSync(att.path);
-              content = fileContent.toString("base64");
+              const filePath = att.path;
+              if (fs.existsSync(filePath)) {
+                return {
+                  filename: filename,
+                  path: filePath,
+                };
+              } else {
+                console.warn(`Attachment file not found: ${filePath}`);
+                return null;
+              }
             } catch (fileErr) {
               console.warn(
                 `Could not read attachment file ${att.path}:`,
@@ -82,20 +98,25 @@ function sendMail({ to, subject, text, html, attachments }) {
               return null; // Skip this attachment if file can't be read
             }
           }
-          // If content is a Buffer, convert to base64 string
-          else if (Buffer.isBuffer(content)) {
-            content = content.toString("base64");
-          }
-          // If content is a string but not base64, encode it
-          else if (typeof content === "string" && !att.isBase64) {
-            content = Buffer.from(content).toString("base64");
+          // If content is provided
+          else if (content) {
+            // If content is a Buffer, use it directly
+            if (Buffer.isBuffer(content)) {
+              return {
+                filename: filename,
+                content: content,
+              };
+            }
+            // If content is a base64 string
+            else if (typeof content === "string") {
+              return {
+                filename: filename,
+                content: Buffer.from(content, "base64"),
+              };
+            }
           }
 
-          return {
-            content: content,
-            filename: att.filename || "attachment",
-            type: att.contentType || att.type || "application/octet-stream",
-          };
+          return null;
         } catch (err) {
           console.warn("Error processing attachment:", err?.message);
           return null; // Skip this attachment if there's an error
@@ -104,34 +125,30 @@ function sendMail({ to, subject, text, html, attachments }) {
       .filter((att) => att !== null); // Remove null entries
   }
 
-  // Send via SendGrid with timeout
+  // Send via Nodemailer with timeout
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       const timeoutErr = new Error(
-        `Email send timeout (10s) for ${to}. SendGrid request took too long.`
+        `Email send timeout (30s) for ${to}. Nodemailer request took too long.`
       );
       console.error(`⏱️ TIMEOUT: ${timeoutErr.message} - Subject: ${subject}`);
       reject(timeoutErr);
-    }, 10000); // 10 second timeout (SendGrid is usually very fast)
+    }, 30000); // 30 second timeout
 
-    sgMail
-      .send(msg)
+    transporter
+      .sendMail(mailOptions)
       .then((response) => {
         clearTimeout(timeoutId);
         console.log(
-          `✅ Email sent successfully to ${to} via SendGrid: ${response[0]?.statusCode}`
+          `✅ Email sent successfully to ${to} via Nodemailer (MessageId: ${response.messageId})`
         );
         console.log(`   Subject: ${subject}`);
-        resolve(response[0]);
+        resolve(response);
       })
       .catch((err) => {
         clearTimeout(timeoutId);
         console.error(`❌ Email send failed for ${to}:`, err?.message || err);
         console.error(`   Subject: ${subject}`);
-        if (err.response) {
-          console.error(`   Error code: ${err.response.statusCode}`);
-          console.error(`   Error details:`, err.response.body);
-        }
         reject(err);
       });
   });
@@ -156,7 +173,9 @@ console.log(`📧 Email Service initialized:`);
 console.log(`   - Frontend URL: ${FRONTEND_URL}`);
 console.log(`   - Environment: ${isProduction ? "Production" : "Development"}`);
 console.log(
-  `   - Email configured: ${sgMailConfigured ? "Yes (SendGrid)" : "No"}`
+  `   - Email configured: ${
+    nodemailerConfigured ? "Yes (Nodemailer/Gmail)" : "No"
+  }`
 );
 console.log(`   - Working directory: ${process.cwd()}`);
 
