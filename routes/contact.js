@@ -18,13 +18,11 @@ router.post("/", async (req, res) => {
     }
 
     // Compose email to site owner
-    const ownerEmail =
-      process.env.SENDGRID_FROM_EMAIL || "sahatushankar234@gmail.com";
+    const ownerEmail = process.env.EMAIL_USER || "sahatushankar234@gmail.com";
     if (!ownerEmail) {
       return res.status(500).json({
         success: false,
-        error:
-          "Server email not configured. Set SENDGRID_FROM_EMAIL in environment.",
+        error: "Server email not configured. Set EMAIL_USER in environment.",
       });
     }
 
